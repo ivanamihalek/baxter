@@ -1,4 +1,7 @@
 #! /usr/bin/env python
+# this is meant to be run with
+# ./manage.py runscript bb03_parse_card_json
+# in that case django will take care of the paths and also check for migrations and such
 
 import json
 from pprint import pprint
@@ -7,6 +10,19 @@ from pprint import pprint
 # reconstructing this, for example:
 # https://card.mcmaster.ca/ontology/40192
 
+# start building the database
+# is the reference sequence available in genome browser
+# https://hgdownload.soe.ucsc.edu/hubs/bacteria/index.html
+# any of those usable? is there any way to get to this data except page scraping?
+# https://genome.ucsc.edu/cgi-bin/hgGateway paste in the assembly
+# if there aren't too many, can request here https://genome.ucsc.edu/assemblyRequest.html
+
+# from tax id can get to assembly, for example
+# https://www.ncbi.nlm.nih.gov/datasets/genome/?taxon=242231
+# search for PDB entry bound to a small molecule, using the protein sequence
+# check if the small molecule belongs to one of the classes that are supposed to be disrupted
+# https://en.wikipedia.org/wiki/List_of_antibiotics
+# download structures and check proximity of the residues to the small molecule
 
 def parse_card_entry(card_entry: dict):
     # pprint(card_entry)
@@ -26,18 +42,6 @@ def parse_card_entry(card_entry: dict):
         print("drug name:", sub_entry["category_aro_name"])  # this may belong to an additional ddrug class
 
     print("*************************\n")
-    # start building the database
-    # is the reference sequence available in genome browser
-    # https://hgdownload.soe.ucsc.edu/hubs/bacteria/index.html
-    # any of those usable? is there any way to get to this data except page scraping?
-    # https://genome.ucsc.edu/cgi-bin/hgGateway paste in the assembly
-    # if there aren't too many, can request here https://genome.ucsc.edu/assemblyRequest.html
-
-    # from tax id can get to assembly, for example https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?lvl=0&id=196620
-    # search for PDB entry bound to a small molecule, using the protein sequence
-    # check if the small molecule belongs to one of the classes that are supposed to be disrupted
-    # https://en.wikipedia.org/wiki/List_of_antibiotics
-    # download structures and check proximity of the residues to the small molecule
 
 
 def process_card_json(card_home: str, accession_numbers: dict):
@@ -88,7 +92,7 @@ def process_card_snps(card_home: str) -> tuple[dict, dict]:
     return accession_number, mutations
 
 
-def main():
+def run():
     card_home = "/storage/databases/CARD-data"
     (accession_numbers, mutations) = process_card_snps(card_home)
 
@@ -97,4 +101,4 @@ def main():
 
 #######################
 if __name__ == "__main__":
-    main()
+    run()
