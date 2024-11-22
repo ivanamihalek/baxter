@@ -1,0 +1,1153 @@
+{
+  "data": {
+    "entry": {
+      "rcsb_id": "2Y3P",
+      "entry": {
+        "id": "2Y3P"
+      },
+      "rcsb_entry_container_identifiers": {
+        "entity_ids": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "pubmed_id": 19965760,
+        "emdb_ids": null,
+        "assembly_ids": [
+          "1"
+        ]
+      },
+      "rcsb_associated_holdings": {
+        "rcsb_repository_holdings_current_entry_container_identifiers": {
+          "assembly_ids": [
+            "1"
+          ]
+        },
+        "rcsb_repository_holdings_current": {
+          "repository_content_types": [
+            "FASTA sequence",
+            "entry mmCIF",
+            "entry PDBML",
+            "entry PDB",
+            "structure factors",
+            "assembly mmCIF",
+            "assembly PDB",
+            "validation report",
+            "validation data mmCIF",
+            "validation fo-fc coefficients",
+            "validation slider image",
+            "validation 2fo-fc coefficients"
+          ]
+        }
+      },
+      "rcsb_comp_model_provenance": null,
+      "pdbx_database_status": {
+        "pdb_format_compatible": "Y"
+      },
+      "struct": {
+        "title": "Crystal structure of N-terminal domain of GyrA with the antibiotic simocyclinone D8"
+      },
+      "rcsb_ma_qa_metric_global": null,
+      "rcsb_primary_citation": {
+        "id": "primary",
+        "pdbx_database_id_DOI": "10.1126/SCIENCE.1179123"
+      },
+      "pubmed": {
+        "rcsb_pubmed_container_identifiers": {
+          "pubmed_id": 19965760
+        },
+        "rcsb_pubmed_central_id": null,
+        "rcsb_pubmed_doi": "10.1126/science.1179123",
+        "rcsb_pubmed_abstract_text": "Simocyclinones are bifunctional antibiotics that inhibit bacterial DNA gyrase by preventing DNA binding to the enzyme. We report the crystal structure of the complex formed between the N-terminal domain of the Escherichia coli gyrase A subunit and simocyclinone D8, revealing two binding pockets that separately accommodate the aminocoumarin and polyketide moieties of the antibiotic. These are close to, but distinct from, the quinolone-binding site, consistent with our observations that several mutations in this region confer resistance to both agents. Biochemical studies show that the individual moieties of simocyclinone D8 are comparatively weak inhibitors of gyrase relative to the parent compound, but their combination generates a more potent inhibitor. Our results should facilitate the design of drug molecules that target these unexploited binding pockets.",
+        "rcsb_pubmed_affiliation_info": [
+          "Department of Biological Chemistry, John Innes Centre, Colney, Norwich NR4 7UH, UK."
+        ]
+      },
+      "pdbx_deposit_group": null,
+      "rcsb_external_references": null,
+      "pdbx_database_PDB_obs_spr": [
+        {
+          "id": "SPRSDE",
+          "replace_pdb_id": "2WL2"
+        }
+      ],
+      "struct_keywords": {
+        "pdbx_keywords": "ISOMERASE",
+        "text": "ISOMERASE, AMINOCOUMARIN ANTIBIOTIC"
+      },
+      "exptl": [
+        {
+          "method": "X-RAY DIFFRACTION"
+        }
+      ],
+      "cell": {
+        "length_a": 143.91,
+        "length_b": 153.09,
+        "length_c": 177.7,
+        "angle_alpha": 90,
+        "angle_beta": 90,
+        "angle_gamma": 90
+      },
+      "symmetry": {
+        "space_group_name_H_M": "I 21 21 21"
+      },
+      "software": [
+        {
+          "classification": "refinement",
+          "name": "REFMAC"
+        },
+        {
+          "classification": "data reduction",
+          "name": "MOSFLM"
+        },
+        {
+          "classification": "data scaling",
+          "name": "SCALA"
+        },
+        {
+          "classification": "phasing",
+          "name": "PHASER"
+        }
+      ],
+      "rcsb_accession_info": {
+        "deposit_date": "2010-12-22T00:00:00Z",
+        "initial_release_date": "2010-12-29T00:00:00Z",
+        "major_revision": 1,
+        "minor_revision": 4
+      },
+      "pdbx_audit_revision_history": [
+        {
+          "ordinal": 1,
+          "data_content_type": "Structure model",
+          "major_revision": 1,
+          "minor_revision": 0,
+          "revision_date": "2010-12-29T00:00:00Z"
+        },
+        {
+          "ordinal": 2,
+          "data_content_type": "Structure model",
+          "major_revision": 1,
+          "minor_revision": 1,
+          "revision_date": "2011-05-08T00:00:00Z"
+        },
+        {
+          "ordinal": 3,
+          "data_content_type": "Structure model",
+          "major_revision": 1,
+          "minor_revision": 2,
+          "revision_date": "2011-07-13T00:00:00Z"
+        },
+        {
+          "ordinal": 4,
+          "data_content_type": "Structure model",
+          "major_revision": 1,
+          "minor_revision": 3,
+          "revision_date": "2017-07-12T00:00:00Z"
+        },
+        {
+          "ordinal": 5,
+          "data_content_type": "Structure model",
+          "major_revision": 1,
+          "minor_revision": 4,
+          "revision_date": "2023-12-20T00:00:00Z"
+        }
+      ],
+      "pdbx_audit_revision_details": [
+        {
+          "ordinal": 1,
+          "revision_ordinal": 1,
+          "data_content_type": "Structure model",
+          "type": "Initial release",
+          "description": null
+        }
+      ],
+      "pdbx_audit_revision_group": [
+        {
+          "ordinal": 1,
+          "revision_ordinal": 2,
+          "data_content_type": "Structure model",
+          "group": "Version format compliance"
+        },
+        {
+          "ordinal": 2,
+          "revision_ordinal": 3,
+          "data_content_type": "Structure model",
+          "group": "Version format compliance"
+        },
+        {
+          "ordinal": 3,
+          "revision_ordinal": 4,
+          "data_content_type": "Structure model",
+          "group": "Data collection"
+        },
+        {
+          "ordinal": 4,
+          "revision_ordinal": 5,
+          "data_content_type": "Structure model",
+          "group": "Data collection"
+        },
+        {
+          "ordinal": 5,
+          "revision_ordinal": 5,
+          "data_content_type": "Structure model",
+          "group": "Database references"
+        },
+        {
+          "ordinal": 6,
+          "revision_ordinal": 5,
+          "data_content_type": "Structure model",
+          "group": "Derived calculations"
+        },
+        {
+          "ordinal": 7,
+          "revision_ordinal": 5,
+          "data_content_type": "Structure model",
+          "group": "Other"
+        },
+        {
+          "ordinal": 8,
+          "revision_ordinal": 5,
+          "data_content_type": "Structure model",
+          "group": "Refinement description"
+        }
+      ],
+      "pdbx_database_related": null,
+      "audit_author": [
+        {
+          "name": "Edwards, M.J."
+        },
+        {
+          "name": "Flatman, R.H."
+        },
+        {
+          "name": "Mitchenall, L.A."
+        },
+        {
+          "name": "Stevenson, C.E.M."
+        },
+        {
+          "name": "Le, T.B.K."
+        },
+        {
+          "name": "Clarke, T.A."
+        },
+        {
+          "name": "McKay, A.R."
+        },
+        {
+          "name": "Fiedler, H.-P."
+        },
+        {
+          "name": "Buttner, M.J."
+        },
+        {
+          "name": "Lawson, D.M."
+        },
+        {
+          "name": "Maxwell, A."
+        }
+      ],
+      "pdbx_audit_support": null,
+      "pdbx_initial_refinement_model": [
+        {
+          "type": "experimental model"
+        }
+      ],
+      "refine": [
+        {
+          "pdbx_refine_id": "X-RAY DIFFRACTION",
+          "ls_d_res_high": 2.62,
+          "ls_R_factor_R_work": 0.20203,
+          "ls_R_factor_R_free": 0.24118,
+          "ls_R_factor_obs": 0.20399
+        }
+      ],
+      "pdbx_nmr_ensemble": null,
+      "em_experiment": null,
+      "em_3d_reconstruction": null,
+      "em_software": null,
+      "citation": [
+        {
+          "id": "primary",
+          "title": "A Crystal Structure of the Bifunctional Antibiotic Simocyclinone D8, Bound to DNA Gyrase.",
+          "rcsb_journal_abbrev": "Science",
+          "rcsb_authors": [
+            "Edwards, M.J.",
+            "Flatman, R.H.",
+            "Mitchenall, L.A.",
+            "Stevenson, C.E.M.",
+            "Le, T.B.K.",
+            "Clarke, T.A.",
+            "Mckay, A.R.",
+            "Fiedler, H.-P.",
+            "Buttner, M.J.",
+            "Lawson, D.M.",
+            "Maxwell, A."
+          ],
+          "year": 2009,
+          "journal_volume": "326",
+          "page_first": "1415",
+          "page_last": null,
+          "pdbx_database_id_PubMed": 19965760,
+          "pdbx_database_id_DOI": "10.1126/SCIENCE.1179123"
+        },
+        {
+          "id": "1",
+          "title": "Crystallization and Preliminary X-Ray Analysis of a Complex Formed between the Antibiotic Simocyclinone D8 and the DNA Breakage-Reunion Domain of Escherichia Coli DNA Gyrase.",
+          "rcsb_journal_abbrev": "Acta Crystallogr Sect F Struct Biol Cryst Commun",
+          "rcsb_authors": [
+            "Edwards, M.J.",
+            "Flatman, R.H.",
+            "Mitchenall, L.A.",
+            "Stevenson, C.E.M.",
+            "Maxwell, A.",
+            "Lawson, D.M."
+          ],
+          "year": 2009,
+          "journal_volume": "65",
+          "page_first": "846",
+          "page_last": null,
+          "pdbx_database_id_PubMed": 19652356,
+          "pdbx_database_id_DOI": "10.1107/S1744309109028097"
+        }
+      ],
+      "rcsb_entry_info": {
+        "molecular_weight": 119.21,
+        "deposited_atom_count": 7953,
+        "deposited_model_count": 1,
+        "deposited_polymer_monomer_count": 1044,
+        "deposited_modeled_polymer_monomer_count": 1002,
+        "deposited_unmodeled_polymer_monomer_count": 42,
+        "polymer_entity_count_protein": 1,
+        "polymer_entity_count_nucleic_acid": 0,
+        "polymer_entity_count_nucleic_acid_hybrid": 0
+      },
+      "rcsb_entry_group_membership": null,
+      "rcsb_binding_affinity": [
+        {
+          "comp_id": "SM8",
+          "type": "Kd",
+          "value": 1300,
+          "unit": "nM",
+          "reference_sequence_identity": null,
+          "provenance_code": "PDBBind",
+          "link": "http://www.pdbbind.org.cn/quickpdb.php?quickpdb=2y3p"
+        }
+      ],
+      "branched_entities": null,
+      "polymer_entities": [
+        {
+          "polymer_entity_instances": [
+            {
+              "rcsb_polymer_entity_instance_container_identifiers": {
+                "auth_asym_id": "A",
+                "asym_id": "A",
+                "entry_id": "2Y3P",
+                "entity_id": "1"
+              },
+              "rcsb_polymer_instance_annotation": [
+                {
+                  "type": "CATH",
+                  "annotation_id": "3.90.199.10"
+                },
+                {
+                  "type": "CATH",
+                  "annotation_id": "3.30.1360.40"
+                },
+                {
+                  "type": "CATH",
+                  "annotation_id": "1.10.268.10"
+                },
+                {
+                  "type": "SCOP",
+                  "annotation_id": "d2y3pa_"
+                },
+                {
+                  "type": "ECOD",
+                  "annotation_id": "e2y3pA1"
+                },
+                {
+                  "type": "ECOD",
+                  "annotation_id": "e2y3pA2"
+                },
+                {
+                  "type": "ECOD",
+                  "annotation_id": "e2y3pA3"
+                }
+              ],
+              "rcsb_polymer_struct_conn": null
+            },
+            {
+              "rcsb_polymer_entity_instance_container_identifiers": {
+                "auth_asym_id": "B",
+                "asym_id": "B",
+                "entry_id": "2Y3P",
+                "entity_id": "1"
+              },
+              "rcsb_polymer_instance_annotation": [
+                {
+                  "type": "SCOP",
+                  "annotation_id": "d2y3pb_"
+                },
+                {
+                  "type": "ECOD",
+                  "annotation_id": "e2y3pB1"
+                },
+                {
+                  "type": "ECOD",
+                  "annotation_id": "e2y3pB2"
+                },
+                {
+                  "type": "ECOD",
+                  "annotation_id": "e2y3pB3"
+                }
+              ],
+              "rcsb_polymer_struct_conn": null
+            }
+          ],
+          "rcsb_polymer_entity_container_identifiers": {
+            "entry_id": "2Y3P",
+            "entity_id": "1",
+            "asym_ids": [
+              "A",
+              "B"
+            ],
+            "auth_asym_ids": [
+              "A",
+              "B"
+            ],
+            "uniprot_ids": [
+              "P0AES5"
+            ],
+            "reference_sequence_identifiers": [
+              {
+                "database_accession": "P0AES5"
+              }
+            ]
+          },
+          "uniprots": [
+            {
+              "rcsb_id": "P0AES5",
+              "rcsb_uniprot_protein": {
+                "source_organism": {
+                  "scientific_name": "Shigella flexneri"
+                }
+              },
+              "rcsb_uniprot_external_reference": null
+            }
+          ],
+          "rcsb_polymer_entity": {
+            "pdbx_description": "DNA GYRASE SUBUNIT A",
+            "rcsb_ec_lineage": [
+              {
+                "id": "5"
+              },
+              {
+                "id": "5.99"
+              },
+              {
+                "id": "5.99.1"
+              },
+              {
+                "id": "5.99.1.3"
+              },
+              {
+                "id": "5"
+              },
+              {
+                "id": "5.6"
+              },
+              {
+                "id": "5.6.2"
+              },
+              {
+                "id": "5.6.2.2"
+              }
+            ],
+            "pdbx_ec": "5.99.1.3",
+            "rcsb_enzyme_class_combined": [
+              {
+                "ec": "5.99.1.3",
+                "provenance_source": "PDB Primary Data"
+              },
+              {
+                "ec": "5.6.2.2",
+                "provenance_source": "UniProt"
+              }
+            ]
+          },
+          "rcsb_polymer_entity_annotation": [
+            {
+              "type": "Pfam",
+              "annotation_lineage": null
+            },
+            {
+              "type": "GO",
+              "annotation_lineage": [
+                {
+                  "name": "binding",
+                  "depth": null
+                },
+                {
+                  "name": "adenyl ribonucleotide binding",
+                  "depth": null
+                },
+                {
+                  "name": "nucleotide binding",
+                  "depth": null
+                },
+                {
+                  "name": "purine ribonucleotide binding",
+                  "depth": null
+                },
+                {
+                  "name": "purine ribonucleoside triphosphate binding",
+                  "depth": null
+                },
+                {
+                  "name": "nucleoside phosphate binding",
+                  "depth": null
+                },
+                {
+                  "name": "ion binding",
+                  "depth": null
+                },
+                {
+                  "name": "purine nucleotide binding",
+                  "depth": null
+                },
+                {
+                  "name": "organic cyclic compound binding",
+                  "depth": null
+                },
+                {
+                  "name": "anion binding",
+                  "depth": null
+                },
+                {
+                  "name": "adenyl nucleotide binding",
+                  "depth": null
+                },
+                {
+                  "name": "ATP binding",
+                  "depth": null
+                },
+                {
+                  "name": "heterocyclic compound binding",
+                  "depth": null
+                },
+                {
+                  "name": "molecular_function",
+                  "depth": null
+                },
+                {
+                  "name": "carbohydrate derivative binding",
+                  "depth": null
+                },
+                {
+                  "name": "ribonucleotide binding",
+                  "depth": null
+                },
+                {
+                  "name": "small molecule binding",
+                  "depth": null
+                }
+              ]
+            },
+            {
+              "type": "GO",
+              "annotation_lineage": [
+                {
+                  "name": "DNA binding",
+                  "depth": null
+                },
+                {
+                  "name": "binding",
+                  "depth": null
+                },
+                {
+                  "name": "organic cyclic compound binding",
+                  "depth": null
+                },
+                {
+                  "name": "nucleic acid binding",
+                  "depth": null
+                },
+                {
+                  "name": "molecular_function",
+                  "depth": null
+                }
+              ]
+            },
+            {
+              "type": "InterPro",
+              "annotation_lineage": [
+                {
+                  "name": "DNA gyrase/topoisomerase IV, subunit A, C-terminal",
+                  "depth": null
+                }
+              ]
+            },
+            {
+              "type": "InterPro",
+              "annotation_lineage": [
+                {
+                  "name": "Type II DNA Topoisomerases",
+                  "depth": null
+                }
+              ]
+            },
+            {
+              "type": "InterPro",
+              "annotation_lineage": [
+                {
+                  "name": "DNA topoisomerase, type IIA-like domain superfamily",
+                  "depth": null
+                }
+              ]
+            },
+            {
+              "type": "GO",
+              "annotation_lineage": [
+                {
+                  "name": "intracellular organelle",
+                  "depth": null
+                },
+                {
+                  "name": "cellular anatomical structure",
+                  "depth": null
+                },
+                {
+                  "name": "cellular_component",
+                  "depth": null
+                },
+                {
+                  "name": "intracellular anatomical structure",
+                  "depth": null
+                },
+                {
+                  "name": "organelle",
+                  "depth": null
+                },
+                {
+                  "name": "membraneless organelle",
+                  "depth": null
+                },
+                {
+                  "name": "intracellular membraneless organelle",
+                  "depth": null
+                },
+                {
+                  "name": "chromosome",
+                  "depth": null
+                }
+              ]
+            },
+            {
+              "type": "InterPro",
+              "annotation_lineage": [
+                {
+                  "name": "DNA topoisomerase, type IIA, alpha-helical domain superfamily",
+                  "depth": null
+                }
+              ]
+            },
+            {
+              "type": "InterPro",
+              "annotation_lineage": [
+                {
+                  "name": "DNA topoisomerase, type IIA, domain A, alpha-beta",
+                  "depth": null
+                }
+              ]
+            },
+            {
+              "type": "InterPro",
+              "annotation_lineage": [
+                {
+                  "name": "DNA gyrase, subunit A",
+                  "depth": null
+                }
+              ]
+            },
+            {
+              "type": "GO",
+              "annotation_lineage": [
+                {
+                  "name": "response to stimulus",
+                  "depth": null
+                },
+                {
+                  "name": "response to chemical",
+                  "depth": null
+                },
+                {
+                  "name": "biological_process",
+                  "depth": null
+                },
+                {
+                  "name": "response to antibiotic",
+                  "depth": null
+                }
+              ]
+            },
+            {
+              "type": "GO",
+              "annotation_lineage": [
+                {
+                  "name": "nucleobase-containing compound metabolic process",
+                  "depth": null
+                },
+                {
+                  "name": "DNA-templated DNA replication",
+                  "depth": null
+                },
+                {
+                  "name": "DNA replication",
+                  "depth": null
+                },
+                {
+                  "name": "biological_process",
+                  "depth": null
+                },
+                {
+                  "name": "metabolic process",
+                  "depth": null
+                },
+                {
+                  "name": "cellular process",
+                  "depth": null
+                },
+                {
+                  "name": "primary metabolic process",
+                  "depth": null
+                },
+                {
+                  "name": "DNA metabolic process",
+                  "depth": null
+                },
+                {
+                  "name": "macromolecule metabolic process",
+                  "depth": null
+                },
+                {
+                  "name": "nucleic acid metabolic process",
+                  "depth": null
+                }
+              ]
+            },
+            {
+              "type": "GO",
+              "annotation_lineage": [
+                {
+                  "name": "ATP-dependent activity, acting on DNA",
+                  "depth": null
+                },
+                {
+                  "name": "isomerase activity",
+                  "depth": null
+                },
+                {
+                  "name": "DNA negative supercoiling activity",
+                  "depth": null
+                },
+                {
+                  "name": "catalytic activity, acting on DNA",
+                  "depth": null
+                },
+                {
+                  "name": "catalytic activity, acting on a nucleic acid",
+                  "depth": null
+                },
+                {
+                  "name": "DNA topoisomerase activity",
+                  "depth": null
+                },
+                {
+                  "name": "DNA topoisomerase type II (double strand cut, ATP-hydrolyzing) activity",
+                  "depth": null
+                },
+                {
+                  "name": "catalytic activity",
+                  "depth": null
+                },
+                {
+                  "name": "molecular_function",
+                  "depth": null
+                },
+                {
+                  "name": "ATP-dependent activity",
+                  "depth": null
+                }
+              ]
+            },
+            {
+              "type": "InterPro",
+              "annotation_lineage": [
+                {
+                  "name": "DNA gyrase/topoisomerase IV, subunit A, C-terminal repeat",
+                  "depth": null
+                }
+              ]
+            },
+            {
+              "type": "GO",
+              "annotation_lineage": [
+                {
+                  "name": "cellular anatomical structure",
+                  "depth": null
+                },
+                {
+                  "name": "cellular_component",
+                  "depth": null
+                },
+                {
+                  "name": "intracellular anatomical structure",
+                  "depth": null
+                },
+                {
+                  "name": "cytoplasm",
+                  "depth": null
+                }
+              ]
+            },
+            {
+              "type": "GO",
+              "annotation_lineage": [
+                {
+                  "name": "chromosome organization",
+                  "depth": null
+                },
+                {
+                  "name": "primary metabolic process",
+                  "depth": null
+                },
+                {
+                  "name": "DNA conformation change",
+                  "depth": null
+                },
+                {
+                  "name": "DNA metabolic process",
+                  "depth": null
+                },
+                {
+                  "name": "nucleic acid metabolic process",
+                  "depth": null
+                },
+                {
+                  "name": "cellular component organization",
+                  "depth": null
+                },
+                {
+                  "name": "nucleobase-containing compound metabolic process",
+                  "depth": null
+                },
+                {
+                  "name": "DNA topological change",
+                  "depth": null
+                },
+                {
+                  "name": "organelle organization",
+                  "depth": null
+                },
+                {
+                  "name": "biological_process",
+                  "depth": null
+                },
+                {
+                  "name": "cellular process",
+                  "depth": null
+                },
+                {
+                  "name": "metabolic process",
+                  "depth": null
+                },
+                {
+                  "name": "cellular component organization or biogenesis",
+                  "depth": null
+                },
+                {
+                  "name": "macromolecule metabolic process",
+                  "depth": null
+                }
+              ]
+            },
+            {
+              "type": "InterPro",
+              "annotation_lineage": [
+                {
+                  "name": "DNA topoisomerase, type IIA, domain A",
+                  "depth": null
+                }
+              ]
+            }
+          ],
+          "rcsb_polymer_entity_group_membership": [
+            {
+              "group_id": "2805_30",
+              "similarity_cutoff": 30,
+              "aggregation_method": "sequence_identity"
+            },
+            {
+              "group_id": "12945_100",
+              "similarity_cutoff": 100,
+              "aggregation_method": "sequence_identity"
+            },
+            {
+              "group_id": "16889_90",
+              "similarity_cutoff": 90,
+              "aggregation_method": "sequence_identity"
+            },
+            {
+              "group_id": "P0AES5",
+              "similarity_cutoff": null,
+              "aggregation_method": "matching_uniprot_accession"
+            },
+            {
+              "group_id": "17983_50",
+              "similarity_cutoff": 50,
+              "aggregation_method": "sequence_identity"
+            },
+            {
+              "group_id": "15550_95",
+              "similarity_cutoff": 95,
+              "aggregation_method": "sequence_identity"
+            },
+            {
+              "group_id": "17526_70",
+              "similarity_cutoff": 70,
+              "aggregation_method": "sequence_identity"
+            }
+          ],
+          "entity_poly": {
+            "type": "polypeptide(L)",
+            "rcsb_entity_polymer_type": "Protein",
+            "pdbx_seq_one_letter_code_can": "SDLAREITPVNIEEELKSSYLDYAMSVIVGRALPDVRDGLKPVHRRVLYAMNVLGNDWNKAYKKSARVVGDVIGKYHPHGDSAVYDTIVRMAQPFSLRYMLVDGQGNFGSIDGDSAAAMRYTEIRLAKIAHELMADLEKETVDFVDNYDGTEKIPDVMPTKIPNLLVNGSSGIAVGMATNIPPHNLTEVINGCLAYIDDEDISIEGLMEHIPGPDFPTAAIINGRRGIEEAYRTGRGKVYIRARAEVEVDAKTGRETIIVHEIPYQVNKARLIEKIAELVKEKRVEGISALRDESDKDGMRIVIEVKRDAVGEVVLNNLYSQTQLQVSFGINMVALHHGQPKIMNLKDIIAAFVRHRREVVTRRTIFELRKARDRAHILEALAVALANIDPIIELIRHAPTPAEAKTALVANPWQLGNVAAMLERAGDDAARPEWLEPEFGVRDGLYYLTEQQAQAILDLRLQKLTGLEHEKLLDEYKELLDQIAELLRILGSADRLMEVIREELELVREQFGDKRRTEITA",
+            "rcsb_sample_sequence_length": 522,
+            "rcsb_mutation_count": 0
+          },
+          "rcsb_entity_source_organism": [
+            {
+              "scientific_name": "ESCHERICHIA COLI",
+              "ncbi_scientific_name": "Escherichia coli",
+              "rcsb_gene_name": null
+            }
+          ],
+          "rcsb_entity_host_organism": [
+            {
+              "ncbi_scientific_name": "Escherichia coli"
+            }
+          ],
+          "prd": null,
+          "chem_comp_nstd_monomers": null
+        }
+      ],
+      "nonpolymer_entities": [
+        {
+          "rcsb_nonpolymer_entity_container_identifiers": {
+            "entry_id": "2Y3P",
+            "entity_id": "2",
+            "auth_asym_ids": [
+              "A",
+              "B"
+            ],
+            "asym_ids": [
+              "C",
+              "D",
+              "F",
+              "G"
+            ],
+            "nonpolymer_comp_id": "MG"
+          },
+          "rcsb_nonpolymer_entity_annotation": null,
+          "nonpolymer_entity_instances": [
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "auth_seq_id": "951",
+                "auth_asym_id": "A",
+                "asym_id": "C",
+                "entry_id": "2Y3P",
+                "entity_id": "2"
+              },
+              "rcsb_nonpolymer_instance_validation_score": [
+                {
+                  "ranking_model_fit": 0.8302,
+                  "ranking_model_geometry": null,
+                  "average_occupancy": 1,
+                  "is_subject_of_investigation": "N",
+                  "is_subject_of_investigation_provenance": null
+                }
+              ]
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "auth_seq_id": "952",
+                "auth_asym_id": "A",
+                "asym_id": "D",
+                "entry_id": "2Y3P",
+                "entity_id": "2"
+              },
+              "rcsb_nonpolymer_instance_validation_score": [
+                {
+                  "ranking_model_fit": 0.6082,
+                  "ranking_model_geometry": null,
+                  "average_occupancy": 1,
+                  "is_subject_of_investigation": "N",
+                  "is_subject_of_investigation_provenance": null
+                }
+              ]
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "auth_seq_id": "951",
+                "auth_asym_id": "B",
+                "asym_id": "F",
+                "entry_id": "2Y3P",
+                "entity_id": "2"
+              },
+              "rcsb_nonpolymer_instance_validation_score": [
+                {
+                  "ranking_model_fit": 0.9007,
+                  "ranking_model_geometry": null,
+                  "average_occupancy": 1,
+                  "is_subject_of_investigation": "N",
+                  "is_subject_of_investigation_provenance": null
+                }
+              ]
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "auth_seq_id": "952",
+                "auth_asym_id": "B",
+                "asym_id": "G",
+                "entry_id": "2Y3P",
+                "entity_id": "2"
+              },
+              "rcsb_nonpolymer_instance_validation_score": [
+                {
+                  "ranking_model_fit": 0.3576,
+                  "ranking_model_geometry": null,
+                  "average_occupancy": 1,
+                  "is_subject_of_investigation": "N",
+                  "is_subject_of_investigation_provenance": null
+                }
+              ]
+            }
+          ],
+          "rcsb_nonpolymer_entity": {
+            "pdbx_description": "MAGNESIUM ION"
+          },
+          "nonpolymer_comp": {
+            "chem_comp": {
+              "id": "MG",
+              "formula_weight": 24.305,
+              "name": "MAGNESIUM ION",
+              "formula": "Mg"
+            },
+            "pdbx_reference_molecule": null,
+            "rcsb_chem_comp_descriptor": {
+              "InChIKey": "JLVVSXFLKOJNIY-UHFFFAOYSA-N"
+            }
+          }
+        },
+        {
+          "rcsb_nonpolymer_entity_container_identifiers": {
+            "entry_id": "2Y3P",
+            "entity_id": "3",
+            "auth_asym_ids": [
+              "A",
+              "B"
+            ],
+            "asym_ids": [
+              "E",
+              "H"
+            ],
+            "nonpolymer_comp_id": "SM8"
+          },
+          "rcsb_nonpolymer_entity_annotation": null,
+          "nonpolymer_entity_instances": [
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "auth_seq_id": "901",
+                "auth_asym_id": "A",
+                "asym_id": "E",
+                "entry_id": "2Y3P",
+                "entity_id": "3"
+              },
+              "rcsb_nonpolymer_instance_validation_score": [
+                {
+                  "ranking_model_fit": 0.3784,
+                  "ranking_model_geometry": 0.1026,
+                  "average_occupancy": 1,
+                  "is_subject_of_investigation": "Y",
+                  "is_subject_of_investigation_provenance": "RCSB"
+                }
+              ]
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "auth_seq_id": "901",
+                "auth_asym_id": "B",
+                "asym_id": "H",
+                "entry_id": "2Y3P",
+                "entity_id": "3"
+              },
+              "rcsb_nonpolymer_instance_validation_score": [
+                {
+                  "ranking_model_fit": 0.299,
+                  "ranking_model_geometry": 0.1124,
+                  "average_occupancy": 1,
+                  "is_subject_of_investigation": "Y",
+                  "is_subject_of_investigation_provenance": "RCSB"
+                }
+              ]
+            }
+          ],
+          "rcsb_nonpolymer_entity": {
+            "pdbx_description": "SIMOCYCLINONE D8"
+          },
+          "nonpolymer_comp": {
+            "chem_comp": {
+              "id": "SM8",
+              "formula_weight": 932.275,
+              "name": "SIMOCYCLINONE D8",
+              "formula": "C46 H42 Cl N O18"
+            },
+            "pdbx_reference_molecule": null,
+            "rcsb_chem_comp_descriptor": {
+              "InChIKey": "PLEGMCYXNQPJNV-VHSVXIAXSA-N"
+            }
+          }
+        }
+      ],
+      "assemblies": [
+        {
+          "rcsb_assembly_container_identifiers": {
+            "assembly_id": "1"
+          },
+          "pdbx_struct_assembly": {
+            "rcsb_details": "author_and_software_defined_assembly",
+            "method_details": "PISA",
+            "rcsb_candidate_assembly": "Y"
+          },
+          "pdbx_struct_assembly_auth_evidence": null,
+          "rcsb_struct_symmetry": [
+            {
+              "kind": "Global Symmetry",
+              "type": "Dihedral",
+              "symbol": "D2",
+              "oligomeric_state": "Homo 4-mer",
+              "stoichiometry": [
+                "A4"
+              ]
+            }
+          ],
+          "rcsb_assembly_info": {
+            "modeled_polymer_monomer_count": 2004
+          }
+        }
+      ]
+    }
+  }
+}
