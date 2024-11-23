@@ -2,12 +2,14 @@
 # this is meant to be run with
 # ./manage.py runscript bb03_parse_card_json
 # in that case django will take care of the paths and also check for migrations and such
+import json
+from pprint import pprint
+
 import requests
 import pandas as pd
 
 import subprocess
 from Bio.Blast import NCBIXML
-from pypdb.clients.data.data_types import DataType, DataFetcher
 
 from .utils import is_nonempty_file
 from bad_bac_exercise.models import CARDModel, Gene, AntibioticResMutation, Drug, DrugClass
@@ -24,27 +26,16 @@ def run_blast(query_file, output_file):
     # todo check success
 
 
-def fetch_pdb_info(pdb_id):
-    # try this maybe? https://github.com/rcsb/py-rcsb-api
-    # https://github.com/rcsb/py-rcsb-api
-    # see https://data.rcsb.org/rest/v1/schema/entry
-    entry = DataFetcher([pdb_id], DataType.ENTRY)
-    property = {
-        "exptl": ["method", "details"],
-        "nonpolymer_comp": ["chem_comp"]
-    }
-    entry.add_property(property)
-    entry.fetch_data()
-    print(entry.response)
-    #
-    # # see https://data.rcsb.org/rest/v1/schema/nonpolymer_entity
-    # entry = DataFetcher([pdb_id], DataType.NONPOLYMER_ENTITY_INSTANCE)
-    # property = {
-    #     "nonpolymer_entities": ["nonpolymer_comp"]
-    # }
-    # entry.add_property(property)
-    # entry.fetch_data()
-    # print(entry.response)
+def fetch_small_molecule_info(pdb_id):
+    # I could not get the graphQL doodoo to work (tried pypdb)
+    url = f"https://data.rcsb.org/rest/v1/core/entry/{pdb_id}"
+    response = requests.get(url)
+    print(response.status_code)  # Print HTTP status code
+    response_dict = response.json()
+    # pprint(response_dict)
+    print(response_dict['rcsb_entry_info']['nonpolymer_bound_components'])
+    # get  InChIKey or some such from comoponents.cif or some such
+    # store inchi key into drug table that I have from CARD database
 
 
 def parse_blast_results(blast_results_file):
@@ -59,7 +50,7 @@ def parse_blast_results(blast_results_file):
                 pdb_id = alignment.hit_id.split("|")[1].upper()
                 print("************************")
                 print(pdb_id)
-                fetch_pdb_info(pdb_id)
+                fetch_small_molecule_info(pdb_id)
                 print(f"Hit: {alignment.hit_id}  {alignment.hit_def}")
                 print(f"Match: {hsp.identities}, alignment length: {hsp.align_length},   E-value: {hsp.expect:.1e}")
                 print(f"alignment length: {hsp.align_length}    gaps: {hsp.gaps}")
@@ -69,7 +60,7 @@ def parse_blast_results(blast_results_file):
 
 def run():
 
-    fetch_pdb_info("2Y3P")
+    fetch_small_molecule_info("2Y3P")
     exit()
     scratch = "/home/ivana/scratch/baxter/blast"
 
