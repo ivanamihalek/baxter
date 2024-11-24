@@ -92,14 +92,17 @@ def store_drug_info(card_dict: dict):
             # some ad hoc input cleanup
             if drug_class_name[-len(" antibiotic"):] == " antibiotic":
                 drug_class_name = drug_class_name[:-len(" antibiotic")]
-
-            print(f"#### {drug_class_name}")
             (drug_class_entry, was_created) = DrugClass.objects.update_or_create(name=drug_class_name)
             drug_class_entries.append(drug_class_entry)
+
         else:
             drug_name = sub_entry["category_aro_name"]
-            print(f"***** {drug_name}")
+            # the accession number used in CARD database
+            # the related puvhem identifier can be found in aro.obo table using this number
+            aro_id = sub_entry["category_aro_accession"]
             (drug_entry, was_created) = Drug.objects.update_or_create(name=drug_name)
+            drug_entry.aro_id = aro_id
+            drug_entry.save()
             drug_entries.append(drug_entry)
 
     return drug_entries, drug_class_entries
@@ -110,8 +113,8 @@ def run():
     # it helps to keep in mind that 'card' here stands for the 'CARD' database name
     # The Comprehensive Antibiotic Resistance Database
     jsonfile = f"{card_home}/card.json"
-    card_dict = json.load(open(jsonfile))
-    for card_id, card_dict in card_dict.items():
+    top_level_dict = json.load(open(jsonfile))
+    for card_id, card_dict in top_level_dict.items():
         if not isinstance(card_dict, dict): continue  # card_dict['_version'] == '3.3.0'
         if 'ARO_accession' not in card_dict: continue  # card_dict['description']
         card_name  = card_dict['CARD_short_name']
@@ -119,8 +122,7 @@ def run():
             card_entry = CARDModel.objects.get(card_name=card_name)
         except CARDModel.DoesNotExist:
             continue
-        print()
-        print(card_name)
+
         gene_entry = store_gene_info(card_entry, card_dict)
         (drug_entries, drug_class_entries) = store_drug_info(card_dict)
         # mutation to drug and drug class mapping

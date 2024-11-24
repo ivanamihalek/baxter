@@ -83,8 +83,14 @@ class Gene2UCSCAssembly(models.Model):
 
 
 class Drug(models.Model):
-    name  = models.CharField(max_length=30, blank=False, null=False)
-
+    name       = models.CharField(max_length=30, blank=False, null=False)
+    aro_id     = models.CharField(max_length=7, blank=False, null=True)
+    pubchem_id = models.IntegerField(blank=False, null=True)
+    is_discrete_structure = models.BooleanField(blank=False, null=True)
+    # InchiKey spec says its 27 characters
+    inchi_key = models.CharField(max_length=27, blank=False, null=True)
+    # there can be isomers, with different smiles
+    canonical_smiles = models.TextField(blank=False, null=True)
     class Meta:
         db_table = 'drugs'
 
@@ -111,7 +117,7 @@ class AntibioticResMutation(models.Model):
 
 
 class PDBStructure(models.Model):
-    pdb_id        = models.CharField(max_length=20, blank=False, null=False, unique=True)
+    pdb_id        = models.CharField(max_length=4, blank=False, null=False, unique=True)
     drugs         = models.ManyToManyField(Drug, db_table="pdb_2_drug")
     drug_classes  = models.ManyToManyField(DrugClass, db_table="pdb_2_drug_class")
     abr_mutations = models.ManyToManyField(AntibioticResMutation, through="Pdb2Mutation")
