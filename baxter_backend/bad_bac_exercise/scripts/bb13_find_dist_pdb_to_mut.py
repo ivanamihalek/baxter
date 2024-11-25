@@ -30,9 +30,18 @@ def run():
         if len(pdb_structures) == 0: continue
 
         # find drug<->pdb pairs
+        mapped_pdb_drug_pairs = []
+        for pdb_entry in pdb_structures:
+            drugs_in_pdb = list(pdb_entry.drugs.all())
+            for drug_entry in drugs_affected:
+                if drug_entry in drugs_in_pdb:
+                    mapped_pdb_drug_pairs.append((pdb_entry, drug_entry))
+        if not mapped_pdb_drug_pairs: continue
 
         print()
-        print(abr_mutation.mutation, abr_mutation.gene.name, [d.name for d in  drugs_affected])
+        print(abr_mutation.mutation, abr_mutation.gene.name)
+        for p, d in mapped_pdb_drug_pairs:
+            print(p.pdb_id, d.name)
 
 #######################
 if __name__ == "__main__":
