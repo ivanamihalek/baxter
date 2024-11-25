@@ -91,6 +91,7 @@ class Drug(models.Model):
     inchi_key = models.CharField(max_length=27, blank=False, null=True)
     # there can be isomers, with different smiles
     canonical_smiles = models.TextField(blank=False, null=True)
+
     class Meta:
         db_table = 'drugs'
 
@@ -121,6 +122,7 @@ class PDBStructure(models.Model):
     drugs         = models.ManyToManyField(Drug, db_table="pdb_2_drug")
     drug_classes  = models.ManyToManyField(DrugClass, db_table="pdb_2_drug_class")
     abr_mutations = models.ManyToManyField(AntibioticResMutation, through="Pdb2Mutation")
+    genes         = models.ManyToManyField(Gene, db_table="pdb_2_gene")
 
     class Meta:
         db_table = 'pdb_structures'
