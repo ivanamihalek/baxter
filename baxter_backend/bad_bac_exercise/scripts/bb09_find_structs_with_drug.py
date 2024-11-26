@@ -14,7 +14,11 @@ def find_pdb_by_smiles(smiles) -> list[str]:
     query = ChemSimilarityQuery(query_type="descriptor", descriptor_type="SMILES",  match_type="graph-exact", value=smiles)
 
     # Execute the query and retrieve results
-    results = query.exec()
+    try:
+        results = query.exec()
+    except Exception as e:
+        print(f"Problem running chem siliarity query for {smiles}: {e}")
+        return []
     if not results: return []
 
     results_dict = results.to_dict()

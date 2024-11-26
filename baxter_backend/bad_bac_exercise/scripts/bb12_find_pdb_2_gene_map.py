@@ -12,7 +12,7 @@ import subprocess
 from Bio.Blast import NCBIXML
 
 from .utils import is_nonempty_file
-from bad_bac_exercise.models import CARDModel, Gene, AntibioticResMutation, Drug, DrugClass, PDBStructure
+from bad_bac_exercise.models import CARDModel, Gene, AntibioticResMutation, Drug, DrugClass, PDBStructure, Pdb2Gene
 
 
 def run_blast(query_file, output_file):
@@ -32,23 +32,42 @@ def parse_blast_results(gene_entry, blast_results_file):
     for blast_record in blast_records:
         print("************************")
         print(f"Query: {blast_record.query}")
-        for alignment in blast_record.alignments:
-            for hsp in alignment.hsps:
 
+        for alignment in blast_record.alignments:
+
+            for hsp in alignment.hsps:
+                # print(alignment.title, hsp.query, hsp.match, hsp.sbjct)
                 if hsp.expect > 0: continue
-                pdb_id = alignment.hit_id.split("|")[1].upper()
+                hit_identifier_fields = alignment.hit_id.split("|")
+                if len(hit_identifier_fields) < 2:
+                    print(f"hullo, where's my pdb id? {alignment.hit_id}")
+                    exit(1)
+                pdb_id    = hit_identifier_fields[1]
+                pdb_chain =  hit_identifier_fields[2] if len(hit_identifier_fields) > 2 else ""
                 try:
                     pdb_struct_entry = PDBStructure.objects.get(pdb_id=pdb_id)
                 except:
                     # print(f"{pdb_id} not in db")
                     continue
-                identitiy_fraction = hsp.identities/hsp.align_length
-                print(pdb_id, f"{identitiy_fraction:.2f}")
-                if identitiy_fraction > 0.9:
-                    pdb_struct_entry.genes.add(gene_entry)
-                    pdb_struct_entry.save()
-
-
+                pct_identity = int(round((hsp.identities/hsp.align_length*100), 0))
+                if pct_identity > 90:
+                    junction_table_entry = {
+                        "pdb": pdb_struct_entry,
+                        "gene": gene_entry,
+                        "pdb_chain": pdb_chain,
+                        "pct_identity": pct_identity,
+                        "gene_seq_aligned": hsp.query,
+                        "gene_seq_start": hsp.query_start,
+                        "gene_seq_end": hsp.query_end,
+                        # there could be all sorts of funny things going on here,
+                        # e.g. 9ggqD that has two residues prepended to the protein seq
+                        # but then the residue numbering starts from 0, for good measure
+                        "pdb_seq_start": hsp.sbjct_start,
+                        "pdb_seq_end": hsp.sbjct_end,
+                        "pdb_seq_aligned": hsp.sbjct,
+                    }
+                    (pdb2gene_entry, was_created) = Pdb2Gene.objects.update_or_create(**junction_table_entry)
+                    pdb2gene_entry.save()
 
 def run():
 
