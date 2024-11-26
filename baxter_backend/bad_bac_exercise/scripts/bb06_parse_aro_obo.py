@@ -2,8 +2,9 @@
 # this is meant to be run with
 # ./manage.py runscript bb06
 # in that case django will take care of the paths and also check for migrations and such
+import json
 
-from bad_bac_exercise.models import CARDModel, Gene, AntibioticResMutation, Drug, DrugClass
+from bad_bac_exercise.models import CARDModel, Drug, Publication
 
 def parse_aro_obo():
     card_home = "/storage/databases/CARD-data"
@@ -13,18 +14,20 @@ def parse_aro_obo():
     inf = open(aro_file)
 
     aro_id2pubchem = {}
+    card_name2pubmed_ids = {}
     reading = False
-    [aro_id, pubchem] = [None, None]
+    [aro_id, pubchem, card_name_short, pubmed_ids] = [None, None, None, None]
     for line in inf:
         line = line.strip()
         if line[:len('[Term]')] == '[Term]':
             reading = True
             continue
         elif len(line) == 0:
-            if aro_id is not  None and pubchem is not None:
+            if aro_id is not None and pubchem is not None:
                 aro_id2pubchem[aro_id] = pubchem
-                aro_id  = None
-                pubchem = None
+            if card_name_short is not None and pubmed_ids is not None:
+                card_name2pubmed_ids[card_name_short] = pubmed_ids
+            [aro_id, pubchem, card_name_short, pubmed_ids] = [None, None, None, None]
             reading = False
             continue
         elif reading:
@@ -32,19 +35,34 @@ def parse_aro_obo():
                 aro_id = line.replace(linestart, '')
             elif line[:len(linestart := 'xref: pubchem.compound:')] == linestart:
                 pubchem = line.replace(linestart, '')
+            elif "EXACT CARD_Short_Name" in line:
+                card_name_short = line.split()[1].replace('"', '')
+            elif "PMID:" in (possible_pmid_list := line.split('[')[-1]):
+                pmid_list = possible_pmid_list.replace(']', '').split(",")
+                pubmed_ids = [int(p.replace("PMID:", '')) for p in pmid_list]
+
     inf.close()
-    return aro_id2pubchem
+    return aro_id2pubchem, card_name2pubmed_ids
 
 
 def run():
 
-    aro_id2pubchem = parse_aro_obo()
+    (aro_id2pubchem, card_name2pubmed_ids) = parse_aro_obo()
     for drug in Drug.objects.all():
         if drug.aro_id not in aro_id2pubchem:
             print(f"pubchem id not found for {drug.name}")
             exit()
         drug.pubchem_id = int(aro_id2pubchem[drug.aro_id])
         drug.save()
+    
+    for card_model in CARDModel.objects.all():
+        if card_model.card_name not in card_name2pubmed_ids:
+            print(f"pubmed ids not found for {card_model.card_name}")
+            exit()
+        for pmid in card_name2pubmed_ids[card_model.card_name]:
+            (publication_entry, was_created) = Publication.objects.update_or_create(pubmed_id=pmid)
+            card_model.publications.add(publication_entry)
+        card_model.save()
 
 
 #######################

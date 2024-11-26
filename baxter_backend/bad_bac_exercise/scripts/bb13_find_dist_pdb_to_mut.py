@@ -41,7 +41,7 @@ def run():
         print()
         print(abr_mutation.mutation, abr_mutation.gene.name)
         for p, d in mapped_pdb_drug_pairs:
-            print(p.pdb_id, d.name)
+            print("\t", p.pdb_id, d.name)
 
 #######################
 if __name__ == "__main__":

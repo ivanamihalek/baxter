@@ -27,18 +27,13 @@ JUNCTION TABLES
 """
 
 
-class Publication(models.Model):
-    pubmed_id = models.IntegerField(null=False, unique=True, default=None)
-
-    class Meta:
-        db_table = 'publications'
-
+#######################################################################
+#  AUX TABLES
 
 # 'model' here is the pathogenicity model; nothing to do with Django
 class CARDModel(models.Model):
     card_name = models.CharField(max_length=20, blank=False, null=False, unique=True)
     card_description = models.TextField()
-    publications = models.ManyToManyField(Publication, db_table="card_model_2_publication")
 
     class Meta:
         db_table = 'card_models'
@@ -53,6 +48,8 @@ class TaxonomyName(models.Model):
         db_table = 'taxonomy_names'
 
 
+#######################################################################
+#  MAIN TABLES
 class UCSCAssembly(models.Model):
     ncbi_accession_number = models.CharField(max_length=50, blank=False, null=False, unique=True)
     refseq_assembly_id   = models.CharField(max_length=50, blank=False, null=False)

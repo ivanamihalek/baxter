@@ -42,14 +42,11 @@ def parse_blast_results(gene_entry, blast_results_file):
                 except:
                     # print(f"{pdb_id} not in db")
                     continue
-                print(pdb_id)
-                print(f"Hit: {alignment.hit_id}  {alignment.hit_def}")
-                print(f"Match: {hsp.identities}, alignment length: {hsp.align_length},   E-value: {hsp.expect:.1e}")
-                print(f"alignment length: {hsp.align_length}    gaps: {hsp.gaps}")
-                print([d.name for d in pdb_struct_entry.drugs.all()])
-                pdb_struct_entry.genes.add(gene_entry)
-                pdb_struct_entry.save()
-                # print(f"Alignment:\n{hsp.sbjct}\n")
+                identitiy_fraction = hsp.identities/hsp.align_length
+                print(pdb_id, f"{identitiy_fraction:.2f}")
+                if identitiy_fraction > 0.9:
+                    pdb_struct_entry.genes.add(gene_entry)
+                    pdb_struct_entry.save()
 
 
 
