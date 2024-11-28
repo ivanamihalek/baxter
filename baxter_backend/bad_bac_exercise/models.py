@@ -123,13 +123,27 @@ class AntibioticResMutation(models.Model):
 
 class PDBStructure(models.Model):
     pdb_id = models.CharField(max_length=4, blank=False, null=False, unique=True)
-    drugs = models.ManyToManyField(Drug, db_table="pdb_2_drug")
+    drugs = models.ManyToManyField(Drug, through="Pdb2Drug")
     drug_classes = models.ManyToManyField(DrugClass, db_table="pdb_2_drug_class")
     abr_mutations = models.ManyToManyField(AntibioticResMutation, through="Pdb2Mutation")
     genes = models.ManyToManyField(Gene, through="Pdb2Gene")
 
     class Meta:
         db_table = 'pdb_structures'
+
+
+class Pdb2Drug(models.Model):
+    pdb = models.ForeignKey(PDBStructure, on_delete=models.CASCADE)
+    drug = models.ForeignKey(Drug, on_delete=models.CASCADE)
+    # we are looking for something like this
+    # HETNAM     MRC MUPIROCIN
+    # except that if we are not lucky, the pdb entry might have
+    # a different name for the same drug
+    drug_name_in_pdb  = models.CharField(max_length=100, blank=True, null=True)
+    drug_residue_name = models.CharField(max_length=3, blank=True, null=True)
+
+    class Meta:
+        db_table = 'pdb_2_drug'
 
 
 class Pdb2Gene(models.Model):
@@ -145,6 +159,7 @@ class Pdb2Gene(models.Model):
     pdb_seq_aligned  = models.TextField()
     pdb_seq_start    = models.IntegerField()
     pdb_seq_end      = models.IntegerField()
+
     class Meta:
         db_table = 'pdb_2_gene'
 

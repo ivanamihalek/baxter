@@ -17,7 +17,7 @@ def find_pdb_by_smiles(smiles) -> list[str]:
     try:
         results = query.exec()
     except Exception as e:
-        print(f"Problem running chem siliarity query for {smiles}: {e}")
+        print(f"Problem running chem similarity query for {smiles}: {e}")
         return []
     if not results: return []
 
