@@ -125,7 +125,7 @@ def run():
         drug_entry = Drug.objects.get(pk=drug_id)
         (drug_name, pdb_code) = get_drug_code_by_smiles(pdb_entry.pdb_id, drug_entry.canonical_smiles)
         print(pdb_id, drug_entry.name, drug_name, pdb_code)
-        if drug_name and  pdb_code:
+        if drug_name and pdb_code:
             pdb_2_drug_entry.drug_name_in_pdb  = drug_name
             pdb_2_drug_entry.drug_residue_name = pdb_code
             pdb_2_drug_entry.save()

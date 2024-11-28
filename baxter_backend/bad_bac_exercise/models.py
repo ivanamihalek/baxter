@@ -138,7 +138,7 @@ class Pdb2Drug(models.Model):
     # we are looking for something like this
     # HETNAM     MRC MUPIROCIN
     # except that if we are not lucky, the pdb entry might have
-    # a different name for the same drug
+    # a different name for the same drug --> use canonical smiles
     drug_name_in_pdb  = models.CharField(max_length=500, blank=True, null=True)
     drug_residue_name = models.CharField(max_length=3, blank=True, null=True)
 
@@ -168,7 +168,7 @@ class Pdb2Mutation(models.Model):
     # django will turn this name int "pdb_id"
     pdb = models.ForeignKey(PDBStructure, on_delete=models.CASCADE)
     antibio_res_mutation = models.ForeignKey(AntibioticResMutation, on_delete=models.CASCADE)
-    dist_to_drug = models.IntegerField(db_comment="Angstroms")
+    dist_to_drug = models.FloatField(db_comment="Angstroms", null=True, blank=False)
 
     class Meta:
         db_table = 'pdb_2_mutation'
