@@ -38,6 +38,8 @@ def run():
     for drug in Drug.objects.all():
         if not drug.is_discrete_structure: continue
         pdbids = find_pdb_by_smiles(drug.canonical_smiles)
+        # todo  -check ir therei any peptide ther at all
+        # pdb has some NMR stuff with drugs only, and such, see for example 1T5N
         if not pdbids: continue
         print(f"{drug.name}  {pdbids}")
         for pdb_id in pdbids:

@@ -5,7 +5,10 @@
 from pprint import pprint
 
 import pubchempy as pcp
-import requests
+from rdkit import Chem
+
+def to_canonical(smiles):
+    return Chem.MolToSmiles(Chem.MolFromSmiles(smiles), True)
 
 
 def run():
@@ -38,13 +41,16 @@ def run():
                     exit()
                 continue
         drug.inchi_key = compounds[0].inchikey
-        if drug.canonical_smiles != compounds[0].canonical_smiles:
-            print(f"canonical smiles for Pubchem id {drug.pubchem_id} does not match the one I already have:")
-            print(f"{drug.pubchem_id}: {compounds[0].canonical_smiles}")
+        # it looks like the  canonical smiles tha I getting here are not the same canonical smiles
+        # that one can get from rdkit and in PDB entries
+        rdkit_canonical = to_canonical(compounds[0].canonical_smiles)
+        if drug.canonical_smiles != rdkit_canonical:
+            print(f"rdkit canonicalized smiles for Pubchem id {drug.pubchem_id} does not match the one I already have:")
+            print(f"{drug.pubchem_id}: {rdkit_canonical}")
             print(f"already have: {drug.canonical_smiles}  - saving anyway")
-        drug.canonical_smiles = compounds[0].canonical_smiles
+        drug.canonical_smiles = rdkit_canonical
         drug.save()
-        print(compounds[0].inchikey, compounds[0].canonical_smiles)
+        print(compounds[0].inchikey, rdkit_canonical)
 
 
 def test_run():
@@ -68,7 +74,7 @@ def test_run():
     # Output the results
     for pubchem_id, inchi_key in inchi_keys.items():
         print("************************")
-        print(f"{pubchem_id}: {inchi_key}  {smiles[pubchem_id]}")
+        print(f"{pubchem_id}: {inchi_key}\n\t{smiles[pubchem_id]}\n\t{to_canonical(smiles[pubchem_id])} ")
 
 
 #######################

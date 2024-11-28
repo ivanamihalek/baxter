@@ -139,7 +139,7 @@ class Pdb2Drug(models.Model):
     # HETNAM     MRC MUPIROCIN
     # except that if we are not lucky, the pdb entry might have
     # a different name for the same drug
-    drug_name_in_pdb  = models.CharField(max_length=100, blank=True, null=True)
+    drug_name_in_pdb  = models.CharField(max_length=500, blank=True, null=True)
     drug_residue_name = models.CharField(max_length=3, blank=True, null=True)
 
     class Meta:
@@ -147,7 +147,7 @@ class Pdb2Drug(models.Model):
 
 
 class Pdb2Gene(models.Model):
-    # django will turn this name int "pdb_id"
+    # django will turn this  "pdb_id"
     pdb = models.ForeignKey(PDBStructure, on_delete=models.CASCADE)
     # django will turn this name int "gene_id"
     gene = models.ForeignKey(Gene, on_delete=models.CASCADE)
