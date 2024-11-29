@@ -7,12 +7,12 @@ import os
 
 import numpy as np
 from Bio.PDB import PDBParser, PDBList, Select
-from bad_bac_exercise.models import AntibioticResMutation, Pdb2Gene, Pdb2Drug, Pdb2Mutation
 
 from .utils import is_nonempty_file
 
 
 def download(pdbdir, pdb_id):
+
     pdbfile = f"{pdbdir}/{pdb_id.lower()}.pdb"
     if is_nonempty_file(pdbfile):
         # print(f"found file: {pdbfile}")
@@ -22,7 +22,7 @@ def download(pdbdir, pdb_id):
         try:
             pdb_filename = pdb_list.retrieve_pdb_file(pdb_id, pdir=pdbdir, file_format="pdb")
         except Exception as e:
-            print(e)
+            # print(e)
             return ""
         if not is_nonempty_file(pdbfile):
             return ""
@@ -31,14 +31,6 @@ def download(pdbdir, pdb_id):
         # print(f"renamed to: {pdbfile}")
 
     return pdbfile
-
-
-class LigandSelect(Select):
-    def __init__(self, ligand_name):
-        self.ligand_name = ligand_name
-
-    def accept_residue(self, residue):
-        return residue.get_resname() == self.ligand_name
 
 
 def ligand_distance(pdb_id, ligand_res_name, query_chain_id, protein_res_id) -> float:
@@ -73,7 +65,7 @@ def ligand_distance(pdb_id, ligand_res_name, query_chain_id, protein_res_id) -> 
             break
 
     if target_residue is None:
-        print(f"residue {protein_res_id} not found in {pdb_id}")
+        print(f"residue {protein_res_id} not found in {pdb_id}, chain {query_chain_id}")
         return -1
 
     # Calculate minimum distance if both are found
@@ -89,6 +81,7 @@ def ligand_distance(pdb_id, ligand_res_name, query_chain_id, protein_res_id) -> 
 
 
 def run():
+    from bad_bac_exercise.models import AntibioticResMutation, Pdb2Gene, Pdb2Drug, Pdb2Mutation
 
     scratch = "/home/ivana/scratch/baxter/blast"
 
@@ -121,6 +114,7 @@ def run():
             pdb_2_drug_entry =  Pdb2Drug.objects.filter(pdb_id=p, drug_id=d)[0]
             ligand_res_name = pdb_2_drug_entry.drug_residue_name
             if ligand_res_name is None: continue
+
             for mapping_entry in Pdb2Gene.objects.filter(pdb_id=p, gene=abr_mutation.gene):
 
                 # is the residue is outside of this piece of structure?
@@ -143,7 +137,7 @@ def run():
                     continue
 
                 chain_id = f"{mapping_entry.pdb_chain}"
-                distance = ligand_distance(p.pdb_id, ligand_res_name, chain_id,  pos_on_pdb_seq)
+                distance = ligand_distance(p.pdb_id, ligand_res_name, chain_id,  mutation_pos)
                 if distance > 11: continue  # this is too far to make difference, for the ligand et least
                 if distance < 0: continue  # something went wrong
 
@@ -164,6 +158,11 @@ def run():
     print(distinct_genes)
     print(total_candidates)
 
+
+def run_test():
+    distance = ligand_distance(pdb_id="1c14", ligand_res_name="TCL", query_chain_id="A", protein_res_id=93)
+    print(distance)
+
 #######################
 if __name__ == "__main__":
-    run()
+    run_test()

@@ -14,6 +14,7 @@ from bs4 import BeautifulSoup
 from bad_bac_exercise.models import UCSCAssembly
 from django.db import connection
 
+
 def douwnload_html_source(url):
     # Fetch the HTML content from the URL
     response = requests.get(url)
@@ -107,6 +108,7 @@ def run():
         cursor.execute("ALTER TABLE ucsc_assemblies AUTO_INCREMENT = 1")  # For MySQL
     # Bulk create instances in the database
     UCSCAssembly.objects.bulk_create([UCSCAssembly(**record) for record in data_dict])
+
 
 #######################
 if __name__ == "__main__":
