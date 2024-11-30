@@ -67,6 +67,65 @@ class UCSCAssembly(models.Model):
         db_table = 'ucsc_assemblies'
 
 
+class Drug(models.Model):
+    name = models.CharField(max_length=30, blank=False, null=False)
+    aro_id = models.CharField(max_length=7, blank=False, null=True)
+    pubchem_id = models.IntegerField(blank=False, null=True)
+    is_discrete_structure = models.BooleanField(blank=False, null=True)
+    # InchiKey spec says its 27 characters
+    inchi_key = models.CharField(max_length=27, blank=False, null=True)
+    # there can be isomers, with different smiles
+    canonical_smiles = models.TextField(blank=False, null=True)
+
+    class Meta:
+        db_table = 'drugs'
+
+
+class DrugClass(models.Model):
+    name = models.CharField(max_length=50, blank=False, null=False)
+
+    class Meta:
+        db_table = 'drug_classes'
+
+
+class Decoy(models.Model):
+    # decoys are some random sequences from innocuous species
+    class Source(models.IntegerChoices):
+        PHAGES = 1, 'phages'
+        HUMAN_MICROBIOME = 2, 'human_microbiome'
+        PLANTS = 3, 'plants'
+
+        @classmethod
+        def translate(self, instr):
+            if str(instr).lower() == 'phages':
+                return self.PHAGES
+            elif str(instr).lower() == 'human_microbiome':
+                return self.HUMAN_MICROBIOME
+            elif str(instr).lower() == 'plants':
+                return self.PLANTS
+
+            raise Exception(f"Unrecognized source for dexoy seqs: {instr}")
+
+    source = models.IntegerField(choices=Source.choices,
+                                 blank=False, null=False,
+                                 db_comment='The meaning of the source fields: 1=pages, 2=human_microbiome, 3=plants')
+    identifier   = models.CharField(max_length=30, blank=False, null=True)
+    species_name = models.CharField(max_length=200, blank=False, null=True)
+    dna_seq = models.TextField(blank=False, null=False)
+
+    class Meta:
+        db_table = 'decoys'
+
+
+class Fingerprint(models.Model):
+    identifier = models.CharField(max_length=30, blank=False, null=False)
+    dna_seq  = models.TextField(blank=False, null=False)
+    assembly = models.ForeignKey(UCSCAssembly, blank=False, null=False, on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'fingerprints'
+
+
 class Gene(models.Model):
     name = models.CharField(max_length=20, blank=False, null=False, unique=True)
     protein_seq = models.TextField(blank=False, null=False)
@@ -75,6 +134,33 @@ class Gene(models.Model):
 
     class Meta:
         db_table = 'genes'
+
+
+class AntibioticResMutation(models.Model):
+    mutation = models.CharField(max_length=20, blank=False, null=False)
+    gene = models.ForeignKey(Gene, on_delete=models.PROTECT)
+    # mapping to card model is here only for sanity checking
+    # and reconstructing how we got to here
+    card_models = models.ManyToManyField(CARDModel, db_table="abrm_2_card_model")
+    drugs_affected = models.ManyToManyField(Drug, db_table="abrm_2_drug")
+    drug_classes_affected = models.ManyToManyField(DrugClass, db_table="abrm_2_drug_class")
+    # assembly that has the reference amino acid right
+    assemblies = models.ManyToManyField(UCSCAssembly, db_table="abrm_2_assembly")
+
+    class Meta:
+        db_table = 'antibiotic_res_mutations'
+        db_table_comment = 'Mutations conferring antibiotic resistance'
+
+
+class PDBStructure(models.Model):
+    pdb_id = models.CharField(max_length=4, blank=False, null=False, unique=True)
+    drugs = models.ManyToManyField(Drug, through="Pdb2Drug")
+    drug_classes = models.ManyToManyField(DrugClass, db_table="pdb_2_drug_class")
+    abr_mutations = models.ManyToManyField(AntibioticResMutation, through="Pdb2Mutation")
+    genes = models.ManyToManyField(Gene, through="Pdb2Gene")
+
+    class Meta:
+        db_table = 'pdb_structures'
 
 
 class Gene2UCSCAssembly(models.Model):
@@ -112,54 +198,6 @@ class Gene2UCSCAssembly(models.Model):
                 name='both_columns_non_negative'
             ),
         ]
-
-
-class Drug(models.Model):
-    name = models.CharField(max_length=30, blank=False, null=False)
-    aro_id = models.CharField(max_length=7, blank=False, null=True)
-    pubchem_id = models.IntegerField(blank=False, null=True)
-    is_discrete_structure = models.BooleanField(blank=False, null=True)
-    # InchiKey spec says its 27 characters
-    inchi_key = models.CharField(max_length=27, blank=False, null=True)
-    # there can be isomers, with different smiles
-    canonical_smiles = models.TextField(blank=False, null=True)
-
-    class Meta:
-        db_table = 'drugs'
-
-
-class DrugClass(models.Model):
-    name = models.CharField(max_length=50, blank=False, null=False)
-
-    class Meta:
-        db_table = 'drug_classes'
-
-
-class AntibioticResMutation(models.Model):
-    mutation = models.CharField(max_length=20, blank=False, null=False)
-    gene = models.ForeignKey(Gene, on_delete=models.PROTECT)
-    # mapping to card model is here only for sanity checking
-    # and reconstructing how we got to here
-    card_models = models.ManyToManyField(CARDModel, db_table="abrm_2_card_model")
-    drugs_affected = models.ManyToManyField(Drug, db_table="abrm_2_drug")
-    drug_classes_affected = models.ManyToManyField(DrugClass, db_table="abrm_2_drug_class")
-    # assembly that has the reference amino acid right
-    assemblies = models.ManyToManyField(UCSCAssembly, db_table="abrm_2_assembly")
-
-    class Meta:
-        db_table = 'antibiotic_res_mutations'
-        db_table_comment = 'Mutations conferring antibiotic resistance'
-
-
-class PDBStructure(models.Model):
-    pdb_id = models.CharField(max_length=4, blank=False, null=False, unique=True)
-    drugs = models.ManyToManyField(Drug, through="Pdb2Drug")
-    drug_classes = models.ManyToManyField(DrugClass, db_table="pdb_2_drug_class")
-    abr_mutations = models.ManyToManyField(AntibioticResMutation, through="Pdb2Mutation")
-    genes = models.ManyToManyField(Gene, through="Pdb2Gene")
-
-    class Meta:
-        db_table = 'pdb_structures'
 
 
 class Pdb2Drug(models.Model):

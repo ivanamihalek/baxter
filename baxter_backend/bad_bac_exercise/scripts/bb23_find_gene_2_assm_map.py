@@ -13,7 +13,7 @@ from bad_bac_exercise.models import AntibioticResMutation, Pdb2Gene, Pdb2Drug, P
 from bad_bac_exercise.models import UCSCAssembly, Gene2UCSCAssembly
 
 
-from .utils import is_nonempty_file
+from bad_bac_exercise.scripts.utils import is_nonempty_file
 
 
 def map_contigs_to_assembly(blastdb_home):
