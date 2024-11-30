@@ -56,7 +56,7 @@ class TaxonomyName(models.Model):
 
 class UCSCAssembly(models.Model):
     ncbi_accession_number = models.CharField(max_length=50, blank=False, null=False, unique=True)
-    refseq_assembly_id = models.CharField(max_length=50, blank=False, null=False)
+    refseq_assembly_id = models.CharField(max_length=50, blank=False, null=False, unique=True)
     common_name = models.CharField(max_length=200, blank=False, null=False)
     scientific_name = models.CharField(max_length=100, blank=False, null=False)
     biosample = models.CharField(max_length=50, blank=False, null=False)
@@ -78,12 +78,40 @@ class Gene(models.Model):
 
 
 class Gene2UCSCAssembly(models.Model):
+    class Strand(models.IntegerChoices):
+        PLUS =  1, 'plus'
+        MINUS = 2, 'minus'
+
+        @classmethod
+        def translate(self, instr):
+            if str(instr).lower() in ['plus', '+', '1']:
+                return self.PLUS
+            elif str(instr).lower() in ['minus', '-', '-1']:
+                return self.MINUS
+            raise Exception(f"Unrecognized strand symbol: {instr}")
+
     gene = models.ForeignKey(Gene, on_delete=models.CASCADE)
-    assembly = models.ForeignKey(UCSCAssembly, on_delete=models.CASCADE)
-    pct_identity = models.IntegerField()
+    assembly     = models.ForeignKey(UCSCAssembly, on_delete=models.CASCADE)
+    pct_identity = models.IntegerField(blank=False, null=True)
+    contig           = models.CharField(max_length=50, blank=False, null=False, unique=True)
+    start_on_contig  = models.IntegerField(blank=False, null=True)
+    end_on_contig    = models.IntegerField(blank=False, null=True)
+    strand_on_contig = models.IntegerField(choices=Strand.choices, blank=False, null=True)
 
     class Meta:
         db_table = 'gene_2_ucsc_assembly'
+        # adding some constraints to mke sure that the start is always amller than end
+        # I am already storing the infor about the strandedness, so I don't need to indicate it by making start > end
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(start_on_contig__lte=models.F('end_on_contig')),
+                name='start_less_than_end'
+            ),
+            models.CheckConstraint(
+                check=models.Q(start_on_contig__gte=0) & models.Q(end_on_contig__gte=0),
+                name='both_columns_non_negative'
+            ),
+        ]
 
 
 class Drug(models.Model):
@@ -115,6 +143,8 @@ class AntibioticResMutation(models.Model):
     card_models = models.ManyToManyField(CARDModel, db_table="abrm_2_card_model")
     drugs_affected = models.ManyToManyField(Drug, db_table="abrm_2_drug")
     drug_classes_affected = models.ManyToManyField(DrugClass, db_table="abrm_2_drug_class")
+    # assembly that has the reference amino acid right
+    assemblies = models.ManyToManyField(UCSCAssembly, db_table="abrm_2_assembly")
 
     class Meta:
         db_table = 'antibiotic_res_mutations'

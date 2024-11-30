@@ -98,7 +98,7 @@ def store_drug_info(card_dict: dict):
         else:
             drug_name = sub_entry["category_aro_name"]
             # the accession number used in CARD database
-            # the related puvhem identifier can be found in aro.obo table using this number
+            # the related pubchem identifier can be found in aro.obo table using this number
             aro_id = sub_entry["category_aro_accession"]
             (drug_entry, was_created) = Drug.objects.update_or_create(name=drug_name)
             drug_entry.aro_id = aro_id

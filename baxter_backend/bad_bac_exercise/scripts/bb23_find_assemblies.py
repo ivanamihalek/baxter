@@ -10,6 +10,8 @@ from glob import glob
 
 from Bio.Blast import NCBIXML
 from bad_bac_exercise.models import AntibioticResMutation, Pdb2Gene, Pdb2Drug, Pdb2Mutation, PDBStructure
+from bad_bac_exercise.models import UCSCAssembly, Gene2UCSCAssembly
+
 
 from .utils import is_nonempty_file
 
@@ -19,7 +21,7 @@ def map_contigs_to_assembly(blastdb_home):
     for txttfile in glob(f"{blastdb_home}/*.contents.txt"):
         refseq_assembly_id = txttfile.split("/")[-1].replace(".contents.txt", "")
         with open(txttfile) as inf:
-            for contig in  inf.read().replace(">", "").split("\n"):
+            for contig in inf.read().replace(">", "").split("\n"):
                 if not contig: continue
                 contigs2assembly[contig] = refseq_assembly_id
     return contigs2assembly
@@ -43,12 +45,45 @@ def parse_blast_results(gene_entry, blast_results_file, contigs2assembly):
 
         for alignment in blast_record.alignments:
             for hsp in alignment.hsps:
+                if hsp.strand[0] == "Minus":
+                    print(f"The query was interpreted as being on the neg strand - how could that happen?")
+                    exit()
                 # print(alignment.title, hsp.query, hsp.match, hsp.sbjct)
                 if hsp.expect > 0: continue
-                pct_identity = round((hsp.identities/hsp.align_length*100), 2)
-                assembly = contigs2assembly.get(alignment.hit_def, "unk")
-                print(alignment.hit_def, pct_identity, hsp.query_start, hsp.query_end, assembly)
 
+                pct_identity = round((hsp.identities/hsp.align_length*100), 2)
+                if pct_identity < 98: continue
+
+                assembly = contigs2assembly.get(alignment.hit_def, "unk")
+                if assembly == "unk": continue
+                qrylen = len(gene_entry.dna_seq)
+                qry_aligned   = hsp.query_end - hsp.query_start + 1
+                plus_strand =  hsp.strand[1] == "Plus"
+                if plus_strand:
+                    sbjct_aligned = hsp.sbjct_end - hsp.sbjct_start + 1
+                else:
+                    sbjct_aligned = hsp.sbjct_start - hsp.sbjct_end + 1
+                if qry_aligned != qrylen or sbjct_aligned != qrylen: continue
+
+                # strand          Tuple of (query, target) strand e.g. ('Plus', 'Minus')
+                # not sure how or why would the fist one be minus
+                print(alignment.hit_def, assembly, pct_identity, hsp.query_start, hsp.query_end,
+                      hsp.sbjct_start, hsp.sbjct_end, hsp.strand)
+                if hsp.strand[0] == "Minus":
+                    print(f"The query was interpreted as being on the neg strand - how could that happen?")
+                    exit()
+                assembly_entry = UCSCAssembly.objects.filter(refseq_assembly_id=assembly)[0]
+                junction_table_entry = {
+                    "gene": gene_entry,
+                    "assembly": assembly_entry,
+                    "pct_identity": pct_identity,
+                    "contig": alignment.hit_def,
+                    "start_on_contig": hsp.sbjct_start if plus_strand else hsp.sbjct_end,
+                    "end_on_contig": hsp.sbjct_end if plus_strand else hsp.sbjct_start,
+                    "strand_on_contig": Gene2UCSCAssembly.Strand.translate(hsp.strand[1])
+                }
+                (gene2assm_entry, was_created) = Gene2UCSCAssembly.objects.update_or_create(**junction_table_entry)
+                gene2assm_entry.save()
 
 
 def run():
