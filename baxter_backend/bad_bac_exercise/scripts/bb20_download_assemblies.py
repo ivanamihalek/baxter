@@ -37,6 +37,7 @@ def create_contents_files():
         else:
             print(f"{fnm_unzipped} not found - no content created")
 
+
 def run():
     homedir = "/storage/databases/ucsc/bacterial_genomes"
     os.chdir(homedir)

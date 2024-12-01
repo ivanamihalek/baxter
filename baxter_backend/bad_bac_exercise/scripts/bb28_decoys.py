@@ -9,11 +9,6 @@ from os import listdir
 from Bio import Entrez
 
 from bad_bac_exercise.models import AntibioticResMutation, Pdb2Gene, Pdb2Drug, Pdb2Mutation, PDBStructure, Decoy
-from bad_bac_exercise.models import UCSCAssembly, Gene2UCSCAssembly
-
-# todo
-# decoy list
-# identifier, source, species name, sequence
 
 
 def create_phage_decoy(seqs_dir):
@@ -43,8 +38,11 @@ def create_phage_decoy(seqs_dir):
 
 
 def run():
+    # https://phagescope.deepomics.org/download#fasta
     phagi_fasta_dir  = "/storage/databases/phagescope/RefSeq"  # one sequence per data file
+    # https://ftp.ncbi.nlm.nih.gov/genomes/HUMAN_MICROBIOM/
     human_microbiome = "/storage/databases/ncbi/human_microbiome"
+    # https://ftp.ncbi.nlm.nih.gov/genomes/genbank/plant
     plant_genomes    = "/storage/databases/ncbi/plant_genomes"
     for _ in range(10):
         create_phage_decoy(phagi_fasta_dir)

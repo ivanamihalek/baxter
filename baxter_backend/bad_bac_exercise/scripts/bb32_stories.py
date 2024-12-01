@@ -5,9 +5,9 @@
 
 import os
 
-from bad_bac_exercise.models import AntibioticResMutation, Pdb2Gene, Pdb2Drug, Pdb2Mutation, PDBStructure
+from bad_bac_exercise.models import AntibioticResMutation, Pdb2Gene, Pdb2Drug, Pdb2Mutation, PDBStructure, Decoy
 from bad_bac_exercise.models import UCSCAssembly, Gene2UCSCAssembly
-
+import random
 
 def run():
 
@@ -16,7 +16,6 @@ def run():
     # start with pdb, arm pairs where the mutation is close to ligand
     # this is supposed to save us time from investigating arms that
 
-    visited = set()
     ecount = 0
     # for pdb_2_arm_entry in Pdb2Mutation.objects.filter(dist_to_drug__lte=9.0):
     for arm_entry in AntibioticResMutation.objects.filter(assemblies__isnull=False).distinct():
@@ -32,8 +31,6 @@ def run():
         aa_to = arm_entry.mutation[-1]
         pos = int(arm_entry.mutation[1:-1])
         # dist = pdb_2_arm_entry.dist_to_drug
-        if arm_entry.id in visited: continue
-        visited.add(arm_entry.id)
         ecount += 1
         print(f"\n******************** EXERCISE {ecount}  *******************************")
         assmb_entry =  arm_entry.assemblies.first()
@@ -42,10 +39,13 @@ def run():
         ########################################
         # FINDING THE SPECIES
         # select region from  assmb_entry.refseq_assembly_id, + 2 decoys  --> task: find problematic species using NCBI Blast
-        q = """Q1:  In the field, using your Flongle, you detected the following three DNA snippets.
+        fingerprint = random.choice(assmb_entry.fingerprint_set.all()).dna_seq
+        decoy1 =  random.choice(Decoy.objects.all()).dna_seq
+        decoy2 =  random.choice(Decoy.objects.all()).dna_seq
+        q = f"""Q1:  In the field, using your Flongle, you detected the following three DNA snippets:
+        {fingerprint[:10]}   {decoy1[:10]}   {decoy2[:10]}   
         Which one is problematic?  Which species does it belong to? """
-        # TODO fingerprint seq and decoys
-        a = f"{assmb_entry.common_name}"
+        a = f"{assmb_entry.common_name}  "
         print(q, "\n", a)
 
         ########################################
@@ -75,18 +75,19 @@ def run():
         print(q, "\n", a)
 
         ########################################
-        # SEARCHINg FOR THE PREVIOUS KNOWLEDGE
+        # SEARCHING FOR THE PREVIOUS KNOWLEDGE
         # ---> is this mutation known?  CARD database -- should get the drug name
         q = """Q5: Is this mutation already known in the literature? Which drug resistance it may cause?"""
         # TODO fetch pubmed IDs
-        a = "pubmed ids, drug names, any should do"
+        drugs = [drug.name for drug in arm_entry.drugs_affected.all()]
+        a = f"{drugs} pubmed ids -- any should do"
         print(q, "\n", a)
 
         ########################################
         # UNDERSTANDING THE IMPACT ON THE SYSTEMC LEVEL
         # ---> PDB search for species + gene + drug name -- make illustration
         q = """Q6: Is the structure of the protein-drug complex known for this bacterial species?
-        Use it to inspec the impact that the mutation will have on the drug binding."""
+        Use it to inspect the impact that the mutation will have on the drug binding."""
         a = f"any of the pdbs that I have here, {pdb_ids}"
         print(q, "\n", a)
 
