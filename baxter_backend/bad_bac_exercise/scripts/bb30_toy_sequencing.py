@@ -186,6 +186,8 @@ def create_sample_genome(scratch_dir, arm_entry):
     # what are the gnomic coords of my codon
     # is the coding strand plus or minus
     strand = gene_2_assmb_entry.get_strand_on_contig_display()
+    if strand=="plus": return
+
     actual_gene_start  = gene_2_assmb_entry.start_on_contig
     actual_gene_end    = gene_2_assmb_entry.end_on_contig
     gene_length = actual_gene_end - actual_gene_start + 1
@@ -204,7 +206,7 @@ def create_sample_genome(scratch_dir, arm_entry):
     print("**********************************")
     biopython_dseq = Seq(toy_genome[toy_gene_start-1:toy_gene_end])
     if strand == "minus":
-        biopython_dseq = biopython_dseq.complement()
+        biopython_dseq = biopython_dseq.reverse_complement()
     biopython_translation = biopython_dseq.translate(table=11)
     print(aa_from, biopython_translation[pos-1], aa_to, strand)
     codon_start = (pos-1)*3
@@ -218,11 +220,12 @@ def create_sample_genome(scratch_dir, arm_entry):
     # this is offset 1 coordinate, liked by blast
     mutation_genomic_position = toy_gene_start + mutation_cdna_pos
 
+    # TODO - I am here - recallute genomic position for the neg strand
     mutated_toy_genome = toy_genome[:mutation_genomic_position-1] + mutation_nucleotide + toy_genome[mutation_genomic_position:]
     print("------------------------------------")
     biopython_dseq = Seq(mutated_toy_genome[toy_gene_start-1:toy_gene_end])
     if strand == "minus":
-        biopython_dseq = biopython_dseq.complement()
+        biopython_dseq = biopython_dseq.reverse_complement()
     biopython_translation = biopython_dseq.translate(table=11)
     print(aa_from, biopython_translation[pos-1], aa_to, strand)
     codon_start = (pos-1)*3
