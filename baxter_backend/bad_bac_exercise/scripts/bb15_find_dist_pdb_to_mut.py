@@ -8,7 +8,7 @@ import os
 import numpy as np
 from Bio.PDB import PDBParser, PDBList, Select
 
-from .utils import is_nonempty_file
+from utils import is_nonempty_file
 
 
 def download(pdbdir, pdb_id):
