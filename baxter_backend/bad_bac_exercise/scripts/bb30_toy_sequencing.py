@@ -125,14 +125,40 @@ def annotation_sanity_check(scratch_dir, verbose=False):
 
 def arms_of_interest() -> set:
     arm_entries = set()
-    for arm_entry in AntibioticResMutation.objects.filter(assemblies__isnull=False).distinct():
+    for arm_entry in AntibioticResMutation.objects.filter(assemblies__isnull=False).filter(flagged=False).distinct():
         pdb_entries = PDBStructure.objects.filter(
             pdb2mutation__antibio_res_mutation=arm_entry,
             pdb2mutation__dist_to_drug__lt=9
         ).distinct()
         if len(pdb_entries) < 1: continue
+        # gene_entry = arm_entry.gene
+        # assmb_entry = gene_entry.ucsc_assemblies.first()
+        # gene_2_assmb_entry: Gene2UCSCAssembly = Gene2UCSCAssembly.objects.get(gene_id=gene_entry.id, assembly_id=assmb_entry.id)
+        # strand = gene_2_assmb_entry.get_strand_on_contig_display()
+        # if strand == "minus": continue
         arm_entries.add(arm_entry)
     return arm_entries
+
+
+def mutation_breakdown(mutation):
+    aa_from = mutation[0]
+    aa_to = mutation[-1]
+    pos = int(mutation[1:-1])
+    return aa_from, pos, aa_to
+
+
+def print_string_100(string: str, file=None):
+    while string:
+        print(string[:100], file=file)
+        string = string[100:]
+
+
+def sequence_from_blastdb(contig_name, start, end) -> str:
+    blastdbcmd = "/usr/third/blast-2.16.0/bin/blastdbcmd"
+    db = "/storage/databases/ucsc/bacterial_genomes/ucsc_bac_genomes.fa"
+    cmd = f"{blastdbcmd} -db {db} -entry {contig_name} -range {start}-{end} "
+    ret = run_subprocess(cmd)
+    return "".join(ret.split("\n")[1:])
 
 
 def mutation_spec(from_codon, aa_to):
@@ -146,34 +172,185 @@ def mutation_spec(from_codon, aa_to):
         diff_indices = [i for i in range(3) if from_codon[i] != to_codon[i]]
         # for now. we'll go for single nucl substitution
         if len(diff_indices) == 0:
-            print(f"bleep")
-            exit(1)
+            # the codon {from_codon} already codes for {aa_to}
+            # this might be a desired effect if we are looking for a silent mutation
+            continue
         elif len(diff_indices) > 1:
             continue
         else:
-            i = diff_indices[0]
-            mutation_codon_pos = i
+            i = random.choice(diff_indices)
             mutation_nucleotide = to_codon[i]
+            mutation_codon_pos = i  # note this is 0-offset
+            break
+            # print(from_codon, to_codon)
 
     if mutation_codon_pos is None or mutation_nucleotide is None:
-        print(f"bleep 2")
-        exit(1)
+        print(f"bleep - I did not find a single nucleotide change to go from {from_codon} to {aa_to}")
+        print(f"to codons: {to_codons}")
+        return None, None
 
     return mutation_codon_pos, mutation_nucleotide
 
 
+def insert_toy_mutation(genome_seq, gene_start, gene_end, strand, mutation, verbose=False):
+    # print(seq_on_assembly)
+    # according to transl table 11, is the aa for the codon correct?
+    (aa_from, pos, aa_to) = mutation_breakdown(mutation)
+
+    if verbose: print("**********************************")
+    biopython_dseq = Seq(genome_seq[gene_start - 1:gene_end])
+    if strand == "minus":
+        biopython_dseq = biopython_dseq.reverse_complement()
+    biopython_translation = biopython_dseq.translate(table=11)
+    if verbose: print(aa_from, biopython_translation[pos - 1], aa_to, strand)
+    if aa_from != biopython_translation[pos - 1]:
+        errmsg  = f"Error the mutation is from {aa_from}. "
+        errmsg += f"However, the sequence at {pos} is {biopython_translation[pos - 1]}."
+        print(errmsg)
+        exit()
+
+    codon_start = (pos - 1) * 3  # 0-offset
+    from_codon = biopython_dseq[codon_start:codon_start + 3]
+    if verbose:
+        print(from_codon, from_codon.translate(table=11))
+        print_string_100(biopython_translation)
+
+    (mutation_codon_pos, mutation_nucleotide) = mutation_spec(from_codon, aa_to)
+    if mutation_codon_pos is None: exit(1)
+
+    # both  codon_start and mutation_codon_pos are 0-offset, so we can slice the sequence string
+    mutation_cdna_pos = codon_start + mutation_codon_pos
+    if strand == 'plus':
+        # this is offset 1 coordinate, liked by blast
+        mutation_genomic_position = gene_start + mutation_cdna_pos
+    else:
+        mutation_nucleotide = str(Seq(mutation_nucleotide).complement())
+        mutation_genomic_position = gene_end - mutation_cdna_pos
+
+    mutated_toy_genome = (genome_seq[:mutation_genomic_position - 1]
+                          + mutation_nucleotide + genome_seq[mutation_genomic_position:])
+
+    if verbose: print("------------------------------------")
+    biopython_dseq = Seq(mutated_toy_genome[gene_start - 1:gene_end])
+    if strand == "minus":
+        biopython_dseq = biopython_dseq.reverse_complement()
+    biopython_translation = biopython_dseq.translate(table=11)
+    if verbose: print(aa_from, biopython_translation[pos - 1], aa_to, strand)
+    if aa_to != biopython_translation[pos - 1]:
+        errmsg  = f"Error the mutation should be to {aa_to}. "
+        errmsg += f"However, the mutated sequence at {pos} is {biopython_translation[pos - 1]}."
+        print(errmsg)
+        exit()
+
+    codon_start = (pos - 1) * 3
+    from_codon = biopython_dseq[codon_start:codon_start + 3]
+    if verbose:
+        print(from_codon, from_codon.translate(table=11))
+        print_string_100(biopython_translation)
+        print()
+
+    return mutated_toy_genome
+
+
+def insert_irrelevant_decoy(toy_genome, db, toy_genome_start, toy_genome_end):
+    # db refers to the actual genome
+    # toy_genome_start and toy_genome_end are the coordinates of the toy genome
+    # on the actual genome
+
+    # one decoy: SNV in an un-annotated region
+    complement = P.closed(toy_genome_start, toy_genome_end)
+    for feature in db.region(start=toy_genome_start, end=toy_genome_end):
+        # feature.attributes is a dict
+        if 'genome' in feature.attributes: continue  # this is the top-top-level interval
+        if 'Parent' in feature.attributes: continue  # we are looking for parent-less intervals
+        complement = complement - P.closed(feature.start, feature.end)
+
+    reasonable_complement = [atomic for atomic in complement if (atomic.upper - atomic.lower) >= 10]
+    if len(reasonable_complement) == 0:
+        print(f"Error = there seem to be fewer un-annotaed regions than I anticipated.")
+        exit()
+
+    # blank - un-annotated, without features
+    random_blank_interval = random.choice(reasonable_complement)
+    random_blank_range_clipped = range(random_blank_interval.lower+3, random_blank_interval.upper-3)
+    random_position = random.choice(random_blank_range_clipped)
+    position_on_toy_genome = random_position - toy_genome_start - 1
+    nt = toy_genome[position_on_toy_genome]
+    replacement = random.choice(list({'A', 'C', 'T', 'G'}.difference({nt})))
+    # print(random_blank_interval, random_position, position_on_toy_genome, nt, replacement)
+    return toy_genome[:position_on_toy_genome] + replacement + toy_genome[position_on_toy_genome+1:]
+
+
+def insert_random_silent_mutation(toy_genome, db, contig_name, toy_genome_start, toy_genome_end, verbose=False):
+    # another decoy: silent mutation in one of the CDS
+    coding_seqs = [feature for feature in db.region(start=toy_genome_start-1, end=toy_genome_end+1, completely_within=True)
+                   if feature.attributes.get('gbkey', ["none"])[0]=="CDS"]
+    # pick one at random
+    random_coding_seq = coding_seqs[0]
+
+    if verbose:
+        print(random_coding_seq.start, random_coding_seq.end, random_coding_seq.strand)
+        print(random_coding_seq.attributes)
+    # translate to make sure it's coding
+    gene_seq = sequence_from_blastdb(contig_name, random_coding_seq.start, random_coding_seq.end)
+    if verbose: print("**********************************")
+    biopython_dseq = Seq(gene_seq)
+    if random_coding_seq.strand == "-":
+        biopython_dseq = biopython_dseq.reverse_complement()
+    biopython_translation = biopython_dseq.translate(table=11)
+
+    # pick codon at random
+    (mutation_codon_pos, mutation_nucleotide) = (None, None)
+    # pick a substitution that leads to the same amino acid
+    # sometimes a codon is unique (M in table 11)
+    panic_ctr = 0
+    random_codon_start = 1
+    while mutation_codon_pos is None:
+        if (panic_ctr := panic_ctr + 1) > 10:
+            print(f"something went wrong with my mutation scheme")
+            exit(1)
+        random_codon_start = random.choice(range(len(biopython_translation)))
+        random_codon = biopython_dseq[3*random_codon_start:3*random_codon_start+3]
+        random_aa = biopython_translation[random_codon_start]
+        if verbose:
+            print(biopython_translation)
+            print(random_codon_start, random_aa, random_codon)
+        # look for the silent mutation; yes, tee same one; we are looking for a silent mutation
+        (mutation_codon_pos, mutation_nucleotide) = mutation_spec(random_codon, random_aa)
+        if verbose: print(mutation_codon_pos, mutation_nucleotide)
+
+    # both  codon_start and mutation_codon_pos are 0-offset, so we can slice the sequence string
+
+    mutation_cdna_pos = random_codon_start + mutation_codon_pos
+    if  random_coding_seq.strand == '+':
+        # this is offset 1 coordinate, liked by blast
+        mutation_genomic_position = random_coding_seq.start + mutation_cdna_pos
+    else:
+        mutation_nucleotide = str(Seq(mutation_nucleotide).complement())
+        mutation_genomic_position = random_coding_seq.end - mutation_cdna_pos
+
+    mutation_toy_genomic_position = mutation_genomic_position - toy_genome_start + 1
+    mutated_toy_genome = (toy_genome[:mutation_toy_genomic_position - 1]
+                          + mutation_nucleotide + toy_genome[mutation_toy_genomic_position:])
+
+    if verbose: print("------------------------------------")
+    muated_biopython_dseq = Seq(mutated_toy_genome[random_coding_seq.start - 1:random_coding_seq.end])
+    if random_coding_seq.strand == "-":
+        muated_biopython_dseq = biopython_dseq.reverse_complement()
+    muated_biopython_translation = biopython_dseq.translate(table=11)
+    if verbose:
+        print(muated_biopython_dseq == biopython_dseq)
+        print(muated_biopython_translation == biopython_translation)
+
+    # recalculate the coordinate from cds to genome, and from genome to toy genome
+    return mutated_toy_genome
+
+
 def create_sample_genome(scratch_dir, arm_entry):
-    blastdbcmd = "/usr/third/blast-2.16.0/bin/blastdbcmd"
-    db = "/storage/databases/ucsc/bacterial_genomes/ucsc_bac_genomes.fa"
 
     # extend the region around the gene to create "sample genome" to use in inSilicoSeq
     # make sure that the region contains some unnannotatd intervals place some decoy mutations there - single nucl, or small deletion
     # in the same gene, away from the mutation of interest put a silent mutation there
-
-    print(arm_entry.mutation)
-    aa_from = arm_entry.mutation[0]
-    aa_to = arm_entry.mutation[-1]
-    pos = int(arm_entry.mutation[1:-1])
 
     gene_entry = arm_entry.gene
     assmb_entry = gene_entry.ucsc_assemblies.first()
@@ -186,73 +363,37 @@ def create_sample_genome(scratch_dir, arm_entry):
     # what are the gnomic coords of my codon
     # is the coding strand plus or minus
     strand = gene_2_assmb_entry.get_strand_on_contig_display()
-    if strand=="plus": return
+    # if strand == 'plus': return
 
     actual_gene_start  = gene_2_assmb_entry.start_on_contig
     actual_gene_end    = gene_2_assmb_entry.end_on_contig
     gene_length = actual_gene_end - actual_gene_start + 1
     extension = int(2.e4)
+    toy_genome_start = actual_gene_start-extension
+    toy_genome_end   = actual_gene_end+extension
 
-    cmd   = f"{blastdbcmd}  -db {db} -entry {gene_2_assmb_entry.contig} "
-    cmd  += f"-range {actual_gene_start-extension}-{actual_gene_end+extension} "
-    ret = run_subprocess(cmd)
-    toy_genome = "".join(ret.split("\n")[1:])
+    toy_genome = sequence_from_blastdb(gene_2_assmb_entry.contig, toy_genome_start, toy_genome_end)
 
-    # print(seq_on_assembly)
-    # according to transl table 11, is the aa for the codon correct?
-    toy_gene_start = extension + 1
-    toy_gene_end   = toy_gene_start + gene_length - 1
-
-    print("**********************************")
-    biopython_dseq = Seq(toy_genome[toy_gene_start-1:toy_gene_end])
-    if strand == "minus":
-        biopython_dseq = biopython_dseq.reverse_complement()
-    biopython_translation = biopython_dseq.translate(table=11)
-    print(aa_from, biopython_translation[pos-1], aa_to, strand)
-    codon_start = (pos-1)*3
-    from_codon = biopython_dseq[codon_start:codon_start+3]
-    print(from_codon, from_codon.translate(table=11))
-    print(biopython_translation)
-
-    mutation_codon_pos, mutation_nucleotide = mutation_spec(from_codon, aa_to)
-
-    mutation_cdna_pos = codon_start + mutation_codon_pos
-    # this is offset 1 coordinate, liked by blast
-    mutation_genomic_position = toy_gene_start + mutation_cdna_pos
-
-    # TODO - I am here - recallute genomic position for the neg strand
-    mutated_toy_genome = toy_genome[:mutation_genomic_position-1] + mutation_nucleotide + toy_genome[mutation_genomic_position:]
-    print("------------------------------------")
-    biopython_dseq = Seq(mutated_toy_genome[toy_gene_start-1:toy_gene_end])
-    if strand == "minus":
-        biopython_dseq = biopython_dseq.reverse_complement()
-    biopython_translation = biopython_dseq.translate(table=11)
-    print(aa_from, biopython_translation[pos-1], aa_to, strand)
-    codon_start = (pos-1)*3
-    from_codon = biopython_dseq[codon_start:codon_start+3]
-    print(from_codon, from_codon.translate(table=11))
-    print(biopython_translation)
-    print()
+    gene_start_on_toy_genome = extension + 1
+    gene_end_on_toy_genome   = gene_start_on_toy_genome + gene_length - 1
+    toy_genome = insert_toy_mutation(toy_genome, gene_start_on_toy_genome, gene_end_on_toy_genome,
+                                     strand, arm_entry.mutation, verbose=False)
 
     dbfnm = f"{scratch_dir}/{fnm}.db"
     db = gffutils.FeatureDB(dbfnm, keep_order=True)
-    s = gene_2_assmb_entry.start_on_contig - 20000
-    e = gene_2_assmb_entry.end_on_contig + 20000
+    toy_genome = insert_irrelevant_decoy(toy_genome, db, toy_genome_start, toy_genome_end)
 
-    # one decoy: SNV in an un-annotated region
-    # complement = P.closed(s, e)
-    # for feature in db.region(start=s, end=e):
-    #     # feature.attributes is a dict
-    #     if 'genome' in feature.attributes: continue  # this is the top-top-level interval
-    #     if 'Parent' in feature.attributes: continue  # we are looking for parent-less intervals
-    #     complement = complement - P.closed(feature.start, feature.end)
-    # for interval in complement:  # put a SNV here as a decoy
-    #     print(interval)
-    #
-    # another decoy: silent mutation in one of the CDS
-    # coding_seqs = [feature for feature in db.region(start=s-1, end=e+1, completely_within=True) if feature.attributes.get('gbkey', ["none"])[0]=="CDS"]
-    # # pick one at random
-    # random_coding_seq = coding_seqs[0]
+    toy_genome = insert_random_silent_mutation(toy_genome, db, gene_2_assmb_entry.contig, toy_genome_start, toy_genome_end)
+    return toy_genome
+
+
+def toy_sequencing(outdir):
+    i_came_from = os.getcwd()
+    os.chdir(outdir)
+    # not that inSilicoSequencing, of which iss is part, must be installed in the local env
+    cmd = "iss generate --genomes sample_genome.fa --model miseq --output sample_reads -n 10k -p 8"
+    ret = run_subprocess(cmd)
+    os.chdir(i_came_from)
 
 
 def run():
@@ -266,9 +407,22 @@ def run():
     annotation_sanity_check(scratch_dir)
 
     for arm_entry in arms_of_interest():
-        create_sample_genome(scratch_dir, arm_entry)
-    exit(1)
-    # iss generate --genomes sample_genome.fa --model miseq --output sample_reads -n 0.5M -p 8
-    # I probably don't need 0.5M - maybe 10K (?) will have to experimant some with that
+        gene_entry = arm_entry.gene
+        assmb_entry = gene_entry.ucsc_assemblies.first()
+        gene_2_assmb_entry: Gene2UCSCAssembly = Gene2UCSCAssembly.objects.get(gene_id=gene_entry.id, assembly_id=assmb_entry.id)
+        # print(arm_entry.gene.name, arm_entry.mutation, assmb_entry.ncbi_accession_number, assmb_entry.refseq_assembly_id)
+        # print(gene_2_assmb_entry.start_on_contig, gene_2_assmb_entry.end_on_contig)
+        # print(assmb_entry)
+        toy_genome = create_sample_genome(scratch_dir, arm_entry)
 
-    # store location of the fastq files in the database
+        outdir = f"{scratch_dir}/toy_genomes/{arm_entry.gene.name}_{arm_entry.mutation}"
+        if not os.path.exists(outdir): os.makedirs(outdir)
+
+        outfnm = f"sample_genome.fa"
+        with open(f"{outdir}/{outfnm}", "w") as outf:
+            print(f">sample", file=outf)
+            print_string_100(toy_genome, file=outf)
+            # store location of the fastq files in the database
+
+        toy_sequencing(outdir)
+

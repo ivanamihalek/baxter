@@ -146,6 +146,8 @@ class AntibioticResMutation(models.Model):
     drug_classes_affected = models.ManyToManyField(DrugClass, db_table="abrm_2_drug_class")
     # assembly that has the reference amino acid right
     assemblies = models.ManyToManyField(UCSCAssembly, db_table="abrm_2_assembly")
+    flagged = models.BooleanField(blank=False, null=False, default=False)
+    comment = models.CharField(max_length=100, blank=False, null=True)
 
     class Meta:
         db_table = 'antibiotic_res_mutations'
