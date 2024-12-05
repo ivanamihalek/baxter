@@ -19,6 +19,33 @@ from bad_bac_exercise.scripts.utils import run_subprocess
 from bad_bac_exercise.models import AntibioticResMutation, PDBStructure, Decoy, Gene2UCSCAssembly
 
 
+class VariantDescription:
+    assembly: str | None = None
+    contig: str | None = None
+    genomic_coordinate: int | None = None
+    toy_coordinate: int | None = None
+    strand: str | None = None
+    codon_number: int | None = None
+    codon_coordinate: int | None = None
+    nt_from: str | None = None
+    nt_to: str | None = None
+    codon_from: str | None = None
+    codon_to: str | None = None
+    aa_from: str | None = None
+    aa_to: str | None = None
+
+    def __init__(self, assembly=None, contig=None, genomic_coordinate=None):
+        self.assembly = assembly
+        self.contig   = contig
+        self.genomic_coordinate = genomic_coordinate
+
+    def __str__(self):
+        return f"""address {self.assembly} {self.contig} {self.genomic_coordinate}"
+            strand: {self.strand}
+            nt: {self.nt_from} > {self.nt_to}
+            codon: {self.codon_from} > {self.codon_to}
+            aa:  {self.aa_from} > {self.aa_to} """
+
 def assemblies_of_interest() -> set:
     # at some point later this may be all species in the db
     # for pdb_2_arm_entry in Pdb2Mutation.objects.filter(dist_to_drug__lte=9.0):
@@ -131,11 +158,6 @@ def arms_of_interest() -> set:
             pdb2mutation__dist_to_drug__lt=9
         ).distinct()
         if len(pdb_entries) < 1: continue
-        # gene_entry = arm_entry.gene
-        # assmb_entry = gene_entry.ucsc_assemblies.first()
-        # gene_2_assmb_entry: Gene2UCSCAssembly = Gene2UCSCAssembly.objects.get(gene_id=gene_entry.id, assembly_id=assmb_entry.id)
-        # strand = gene_2_assmb_entry.get_strand_on_contig_display()
-        # if strand == "minus": continue
         arm_entries.add(arm_entry)
     return arm_entries
 
@@ -168,6 +190,7 @@ def mutation_spec(from_codon, aa_to):
 
     mutation_codon_pos  = None
     mutation_nucleotide = None
+    to_codon = None
     for to_codon in to_codons:
         diff_indices = [i for i in range(3) if from_codon[i] != to_codon[i]]
         # for now. we'll go for single nucl substitution
@@ -189,19 +212,19 @@ def mutation_spec(from_codon, aa_to):
         print(f"to codons: {to_codons}")
         return None, None
 
-    return mutation_codon_pos, mutation_nucleotide
+    return mutation_codon_pos, mutation_nucleotide, to_codon
 
 
-def insert_toy_mutation(genome_seq, gene_start, gene_end, strand, mutation, verbose=False):
+def insert_toy_mutation(genome_seq, gene_start, gene_end, strand, mutation, verbose=False) -> (str, VariantDescription):
     # print(seq_on_assembly)
     # according to transl table 11, is the aa for the codon correct?
     (aa_from, pos, aa_to) = mutation_breakdown(mutation)
 
     if verbose: print("**********************************")
-    biopython_dseq = Seq(genome_seq[gene_start - 1:gene_end])
+    biopython_mutated_coding_dseq = Seq(genome_seq[gene_start - 1:gene_end])
     if strand == "minus":
-        biopython_dseq = biopython_dseq.reverse_complement()
-    biopython_translation = biopython_dseq.translate(table=11)
+        biopython_mutated_coding_dseq = biopython_mutated_coding_dseq.reverse_complement()
+    biopython_translation = biopython_mutated_coding_dseq.translate(table=11)
     if verbose: print(aa_from, biopython_translation[pos - 1], aa_to, strand)
     if aa_from != biopython_translation[pos - 1]:
         errmsg  = f"Error the mutation is from {aa_from}. "
@@ -210,12 +233,12 @@ def insert_toy_mutation(genome_seq, gene_start, gene_end, strand, mutation, verb
         exit()
 
     codon_start = (pos - 1) * 3  # 0-offset
-    from_codon = biopython_dseq[codon_start:codon_start + 3]
+    condon_on_the_orig_dseq = biopython_mutated_coding_dseq[codon_start:codon_start + 3]
     if verbose:
-        print(from_codon, from_codon.translate(table=11))
+        print(condon_on_the_orig_dseq, condon_on_the_orig_dseq.translate(table=11))
         print_string_100(biopython_translation)
 
-    (mutation_codon_pos, mutation_nucleotide) = mutation_spec(from_codon, aa_to)
+    (mutation_codon_pos, mutation_nucleotide, to_codon) = mutation_spec(condon_on_the_orig_dseq, aa_to)
     if mutation_codon_pos is None: exit(1)
 
     # both  codon_start and mutation_codon_pos are 0-offset, so we can slice the sequence string
@@ -224,6 +247,7 @@ def insert_toy_mutation(genome_seq, gene_start, gene_end, strand, mutation, verb
         # this is offset 1 coordinate, liked by blast
         mutation_genomic_position = gene_start + mutation_cdna_pos
     else:
+        # we need to translate back to the plus strand
         mutation_nucleotide = str(Seq(mutation_nucleotide).complement())
         mutation_genomic_position = gene_end - mutation_cdna_pos
 
@@ -231,10 +255,10 @@ def insert_toy_mutation(genome_seq, gene_start, gene_end, strand, mutation, verb
                           + mutation_nucleotide + genome_seq[mutation_genomic_position:])
 
     if verbose: print("------------------------------------")
-    biopython_dseq = Seq(mutated_toy_genome[gene_start - 1:gene_end])
+    biopython_mutated_coding_dseq = Seq(mutated_toy_genome[gene_start - 1:gene_end])
     if strand == "minus":
-        biopython_dseq = biopython_dseq.reverse_complement()
-    biopython_translation = biopython_dseq.translate(table=11)
+        biopython_mutated_coding_dseq = biopython_mutated_coding_dseq.reverse_complement()
+    biopython_translation = biopython_mutated_coding_dseq.translate(table=11)
     if verbose: print(aa_from, biopython_translation[pos - 1], aa_to, strand)
     if aa_to != biopython_translation[pos - 1]:
         errmsg  = f"Error the mutation should be to {aa_to}. "
@@ -243,13 +267,22 @@ def insert_toy_mutation(genome_seq, gene_start, gene_end, strand, mutation, verb
         exit()
 
     codon_start = (pos - 1) * 3
-    from_codon = biopython_dseq[codon_start:codon_start + 3]
+    condon_on_the_mutated_dseq = biopython_mutated_coding_dseq[codon_start:codon_start + 3]
     if verbose:
-        print(from_codon, from_codon.translate(table=11))
+        print(condon_on_the_mutated_dseq, condon_on_the_mutated_dseq.translate(table=11))
         print_string_100(biopython_translation)
         print()
 
-    return mutated_toy_genome
+    var_descr = VariantDescription()
+    var_descr.strand = strand
+    var_descr.toy_coordinate = mutation_genomic_position
+    var_descr.nt_from = genome_seq[mutation_genomic_position-1]
+    var_descr.nt_to = mutation_nucleotide
+    var_descr.codon_from = condon_on_the_orig_dseq
+    var_descr.codon_to = condon_on_the_mutated_dseq
+    var_descr.aa_from = aa_from
+    var_descr.aa_to = aa_to
+    return mutated_toy_genome, var_descr
 
 
 def insert_irrelevant_decoy(toy_genome, db, toy_genome_start, toy_genome_end):
@@ -369,21 +402,28 @@ def create_sample_genome(scratch_dir, arm_entry):
     actual_gene_end    = gene_2_assmb_entry.end_on_contig
     gene_length = actual_gene_end - actual_gene_start + 1
     extension = int(2.e4)
-    toy_genome_start = actual_gene_start-extension
-    toy_genome_end   = actual_gene_end+extension
+    toy_genome_start = actual_gene_start - extension
+    toy_genome_end   = actual_gene_end + extension
 
     toy_genome = sequence_from_blastdb(gene_2_assmb_entry.contig, toy_genome_start, toy_genome_end)
-
     gene_start_on_toy_genome = extension + 1
     gene_end_on_toy_genome   = gene_start_on_toy_genome + gene_length - 1
-    toy_genome = insert_toy_mutation(toy_genome, gene_start_on_toy_genome, gene_end_on_toy_genome,
+
+    var_descr: VariantDescription
+    (toy_genome, var_descr) = insert_toy_mutation(toy_genome, gene_start_on_toy_genome, gene_end_on_toy_genome,
                                      strand, arm_entry.mutation, verbose=False)
-
-    dbfnm = f"{scratch_dir}/{fnm}.db"
-    db = gffutils.FeatureDB(dbfnm, keep_order=True)
-    toy_genome = insert_irrelevant_decoy(toy_genome, db, toy_genome_start, toy_genome_end)
-
-    toy_genome = insert_random_silent_mutation(toy_genome, db, gene_2_assmb_entry.contig, toy_genome_start, toy_genome_end)
+    var_descr.assembly = refseq
+    var_descr.contig = gene_2_assmb_entry.contig
+    var_descr.genomic_coordinate = toy_genome_start + var_descr.toy_coordinate - 1
+    print(f"inserted toy variant to result in {arm_entry.mutation} in {arm_entry.gene.name}")
+    print(var_descr)
+    print()
+    #
+    # dbfnm = f"{scratch_dir}/{fnm}.db"
+    # db = gffutils.FeatureDB(dbfnm, keep_order=True)
+    # toy_genome = insert_irrelevant_decoy(toy_genome, db, toy_genome_start, toy_genome_end)
+    #
+    # toy_genome = insert_random_silent_mutation(toy_genome, db, gene_2_assmb_entry.contig, toy_genome_start, toy_genome_end)
     return toy_genome
 
 
@@ -407,8 +447,14 @@ def run():
     annotation_sanity_check(scratch_dir)
 
     for arm_entry in arms_of_interest():
-        gene_entry = arm_entry.gene
+        gene_entry  = arm_entry.gene
         assmb_entry = gene_entry.ucsc_assemblies.first()
+        # if arm_entry.mutation != "G406D": continue
+        # if gene_entry.id != 40: continue
+        # if assmb_entry.id != 66: continue
+        print(gene_entry.id, assmb_entry.id, arm_entry.mutation)
+        print(assmb_entry.refseq_assembly_id, assmb_entry.common_name)
+
         gene_2_assmb_entry: Gene2UCSCAssembly = Gene2UCSCAssembly.objects.get(gene_id=gene_entry.id, assembly_id=assmb_entry.id)
         # print(arm_entry.gene.name, arm_entry.mutation, assmb_entry.ncbi_accession_number, assmb_entry.refseq_assembly_id)
         # print(gene_2_assmb_entry.start_on_contig, gene_2_assmb_entry.end_on_contig)
@@ -426,3 +472,19 @@ def run():
 
         toy_sequencing(outdir)
 
+        # TODO I am here -- implement the check
+        # first need to index the reference
+        # /usr/third/bwa-mem2-2.2.1/bwa-mem2 index GCF_000195955.2.fa
+        # /usr/third/bwa-mem2-2.2.1/bwa-mem2 mem GCF_000195955.2.fa sample_reads_R1.fastq sample_reads_R2.fastq  > test.sam
+        # /usr/third/samtools-1.15.1/samtools sort test.sam > test.sorted.bam
+        # /usr/third/samtools-1.15.1/samtools index test.sorted.bam
+        # thi works and produces this strange input
+        # implement variant calling to check where didi the variants end up
+        # https://gatk.broadinstitute.org/hc/en-us/articles/360037225632-HaplotypeCaller
+        # java -jar /usr/third/gatk/picard.jar AddOrReplaceReadGroups I=test.sorted.bam O=test.sorted.read_groups.bam SORT_ORDER=coordinate RGID=foo RGLB=bar  RGPL=illumina RGSM=Sample1 CREATE_INDEX=True RGPU=unit1
+        # /usr/third/gatk/gatk-4.6.1.0/gatk CreateSequenceDictionary -R GCF_000195955.2.fa
+        # fai also must be present
+        # /usr/third/gatk/gatk-4.6.1.0/gatk --java-options "-Xmx4g" HaplotypeCaller -R GCF_000195955.2.fa  -I test.sorted.read_groups.bam -O tes.out.vcf
+        #
+        # cmd = "/usr/third/bwa-mem2-2.2.1/bwa-mem2 "
+        # ret = run_subprocess(cmd)
