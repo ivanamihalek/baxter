@@ -3,6 +3,24 @@ import os
 import shlex
 import subprocess
 import sys
+import random, string
+
+
+def die_if_not_executable(runnable, prepend="", logspecial=None):
+    errmsg = None
+    if not runnable:
+        errmsg = f"{prepend} runnable name not specified."
+    elif not os.path.exists(runnable):
+        errmsg = f"{prepend} runnable {runnable} not found."
+    elif os.path.isdir(runnable):
+        errmsg = f"{prepend} {runnable} is a directory, not a runnable."
+    elif not os.access(runnable, os.X_OK):  # is this executable by us
+        errmsg = f"{prepend} {runnable} is not runnable."
+
+    if errmsg:
+        print(errmsg)
+        raise NotImplementedError(errmsg)
+    return
 
 
 def die_if_not_nonempty_file(filename, prepend="", logspecial=None):
@@ -22,6 +40,7 @@ def die_if_not_nonempty_file(filename, prepend="", logspecial=None):
     if errmsg:
         raise FileNotFoundError(errmsg)
     return
+
 
 def is_nonempty_file(fnm):
     return os.path.exists(fnm) and os.path.getsize(fnm) > 0
@@ -93,3 +112,8 @@ def run_subprocess(cmd_string, env_variables=None, unset_env_vars=None, env_vars
             exit(1)
 
     return ret.stdout.decode('utf-8').strip() if ret.stdout else None
+
+
+def randomword(length):
+   letters = string.ascii_uppercase
+   return ''.join(random.choice(letters) for _ in range(length))

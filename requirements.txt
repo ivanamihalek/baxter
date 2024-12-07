@@ -68,3 +68,5 @@ tzdata==2024.2
 urllib3==2.2.3
 wget==3.2
 zipp==3.21.0
+
+portion~=2.6.0

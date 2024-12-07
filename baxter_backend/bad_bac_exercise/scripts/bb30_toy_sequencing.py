@@ -2,6 +2,7 @@
 # this is meant to be run with
 # ./manage.py runscript bb03_parse_card_json
 # in that case django will take care of the paths and also check for migrations and such
+from glob import glob
 
 import gffutils
 import os.path
@@ -17,6 +18,7 @@ from Bio.Seq import Seq
 from bad_bac_exercise.scripts.utils import run_subprocess
 
 from bad_bac_exercise.models import AntibioticResMutation, PDBStructure, Decoy, Gene2UCSCAssembly
+from bad_bac_exercise.scripts.thrid_party_tools import bwa_mem2_alignment
 
 
 class VariantDescription:
@@ -300,7 +302,7 @@ def insert_irrelevant_decoy(toy_genome, db, toy_genome_start, toy_genome_end):
 
     reasonable_complement = [atomic for atomic in complement if (atomic.upper - atomic.lower) >= 10]
     if len(reasonable_complement) == 0:
-        print(f"Error = there seem to be fewer un-annotaed regions than I anticipated.")
+        print(f"Error = there seem to be fewer un-annotated regions than I anticipated.")
         exit()
 
     # blank - un-annotated, without features
@@ -431,8 +433,13 @@ def toy_sequencing(outdir):
     i_came_from = os.getcwd()
     os.chdir(outdir)
     # not that inSilicoSequencing, of which iss is part, must be installed in the local env
-    cmd = "iss generate --genomes sample_genome.fa --model miseq --output sample_reads -n 10k -p 8"
+    sample_reads_name_root = "sample_reads"
+    cmd = f"iss generate --genomes sample_genome.fa --model miseq --output {sample_reads_name_root} -n 10k -p 8"
     ret = run_subprocess(cmd)
+    # ISS creates some junk
+    os.remove(f"{sample_reads_name_root}_abundance.txt")
+    for fnm in glob(f"{sample_reads_name_root}*tmp*.vcf"):
+        os.remove(fnm)
     os.chdir(i_came_from)
 
 
@@ -473,18 +480,8 @@ def run():
         toy_sequencing(outdir)
 
         # TODO I am here -- implement the check
-        # first need to index the reference
-        # /usr/third/bwa-mem2-2.2.1/bwa-mem2 index GCF_000195955.2.fa
-        # /usr/third/bwa-mem2-2.2.1/bwa-mem2 mem GCF_000195955.2.fa sample_reads_R1.fastq sample_reads_R2.fastq  > test.sam
-        # /usr/third/samtools-1.15.1/samtools sort test.sam > test.sorted.bam
-        # /usr/third/samtools-1.15.1/samtools index test.sorted.bam
-        # thi works and produces this strange input
-        # implement variant calling to check where didi the variants end up
-        # https://gatk.broadinstitute.org/hc/en-us/articles/360037225632-HaplotypeCaller
-        # java -jar /usr/third/gatk/picard.jar AddOrReplaceReadGroups I=test.sorted.bam O=test.sorted.read_groups.bam SORT_ORDER=coordinate RGID=foo RGLB=bar  RGPL=illumina RGSM=Sample1 CREATE_INDEX=True RGPU=unit1
-        # /usr/third/gatk/gatk-4.6.1.0/gatk CreateSequenceDictionary -R GCF_000195955.2.fa
-        # fai also must be present
-        # /usr/third/gatk/gatk-4.6.1.0/gatk --java-options "-Xmx4g" HaplotypeCaller -R GCF_000195955.2.fa  -I test.sorted.read_groups.bam -O tes.out.vcf
-        #
-        # cmd = "/usr/third/bwa-mem2-2.2.1/bwa-mem2 "
-        # ret = run_subprocess(cmd)
+        reference_genome = f"/storage/databases/ucsc/bacterial_genomes/{assmb_entry.refseq_assembly_id}.fa"
+        sample_reads = [f"{outdir}/sample_reads_R{i}.fastq" for i in range(1, 3)]
+        bwa_mem2_alignment(reference_genome, sample_reads, f"{outdir}/toy_alignment.bam")
+
+        exit()
