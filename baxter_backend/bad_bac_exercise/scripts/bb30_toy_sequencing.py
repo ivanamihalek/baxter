@@ -18,7 +18,7 @@ from Bio.Seq import Seq
 from bad_bac_exercise.scripts.utils import run_subprocess
 
 from bad_bac_exercise.models import AntibioticResMutation, PDBStructure, Decoy, Gene2UCSCAssembly
-from bad_bac_exercise.scripts.thrid_party_tools import bwa_mem2_alignment
+from bad_bac_exercise.scripts.thrid_party_tools import bwa_mem2_alignment, gatk_haplotyper_variant_caller
 
 
 class VariantDescription:
@@ -479,9 +479,22 @@ def run():
 
         toy_sequencing(outdir)
 
-        # TODO I am here -- implement the check
+        print("checking the synthetic variants")
+
+        # align the sequences
+        print(f"\treads alignment")
         reference_genome = f"/storage/databases/ucsc/bacterial_genomes/{assmb_entry.refseq_assembly_id}.fa"
-        sample_reads = [f"{outdir}/sample_reads_R{i}.fastq" for i in range(1, 3)]
-        bwa_mem2_alignment(reference_genome, sample_reads, f"{outdir}/toy_alignment.bam")
+        sample_reads = [f"sample_reads_R{i}.fastq" for i in range(1, 3)]
+        bam_file = f"toy_alignment.bam"
+        bwa_mem2_alignment(reference_genome, outdir, sample_reads,  bam_file)
+
+        # call the variants
+        print(f"\tvariants calling")
+        out_vcf = "toy_vars_called.vcf"
+        gatk_haplotyper_variant_caller(reference_genome, outdir, bam_file, out_vcf)
+
+        # annotate # TODO I am here
+
+        # compare with the intended
 
         exit()
