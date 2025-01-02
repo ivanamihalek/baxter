@@ -1,9 +1,11 @@
 #! /usr/bin/env python
-# this is meant to be run with
-# ./manage.py runscript bb01_ucsc_bac_genomes
-# in that case django will take care of the paths and also check for migrations and such
+import os
 import re
 from pprint import pprint
+import django
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+django.setup()
 
 import pandas as pd
 import requests
@@ -13,6 +15,7 @@ from bs4 import BeautifulSoup
 
 from models.bad_bac_models import UCSCAssembly
 from django.db import connection
+
 
 
 def douwnload_html_source(url):
@@ -91,6 +94,8 @@ def run():
     df.columns = df.columns.str.lower()
     # remove all rows that do not have a proper accession identifier
     df = df[df['ncbi_accession_number'].str.startswith('ASM')]
+    # remove rows with duplicate ASM identfiers
+    df = df.drop_duplicates(subset='ncbi_accession_number', keep='first')
     # Convert date column to proper format
     df['assembly_date'] = pd.to_datetime(df['assembly_date']).dt.date
     # Convert DataFrame to dictionary format

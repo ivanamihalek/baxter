@@ -1,11 +1,13 @@
 #! /usr/bin/env python
-# this is meant to be run with
-# ./manage.py runscript bb03_parse_snp_txt
-# in that case django will take care of the paths and also check for migrations and such
+import os
+import django
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+django.setup()
 
 import json
 from pprint import pprint
-from bad_bac_exercise.models import CARDModel, Gene, AntibioticResMutation
+from models.bad_bac_models import CARDModel, Gene, AntibioticResMutation
 
 
 def process_card_snps(card_home: str) -> tuple[dict, dict]:

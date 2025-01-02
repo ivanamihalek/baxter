@@ -88,12 +88,12 @@ DATABASES = {
         'NAME': 'baxter',
         'USER': 'baxter',
         'PASSWORD': os.environ['MYSQL_PASSWORD'],
-        # 'HOST': '127.0.0.1',   # an IP Address that your DB is hosted on
-        # 'PORT': '3308',
+        'HOST': '127.0.0.1',   # an IP Address that your DB is hosted on
+        'PORT': '3308',
         # todo I am here
-        # how am I supposed to know the IP and the port here?
-        'HOST': '10.89.1.2',
-        'PORT': '3306'
+        # how am I supposed to know the IP and the port here? this is when the backend itself is containerized
+        # 'HOST': '10.89.1.2',
+        # 'PORT': '3306'
     }
 }
 
