@@ -1,12 +1,33 @@
-version: '3.8'
+version: '2'  # Specify the Docker Compose version
 
 services:
-  mariadb:
+
+  baxter-mariadb:
     image: mariadb:latest
     container_name: baxter-mariadb
     ports:
       - "3308:3306"
     volumes:
       - /storage/mariadb:/var/lib/mysql:Z
-    environment:  # this refers to the environment inside the container
+    environment: # this refers to the environment inside the container
       MARIADB_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+
+  baxter-backend:
+    build:
+      context: ./backend  # Path to the backend Dockerfile
+      args:
+        mysql_password: ${MYSQL_PASSWORD}
+    image: baxter-backend-img  # Name of the image
+    container_name: baxter-backend-ctnr
+    ports:
+      - "8000:8000"
+    depends_on:
+      - baxter-mariadb
+
+  baxter-frontend:
+    build:
+      context: ./frontend  # Path to the frontend Dockerfile
+    image: baxter-frontend-img  # Name of the image
+    container_name: baxter-frontend-ctnr
+    ports:
+      - "3000:3000"  # Map port 3000 of the container to port 3000 on the host

@@ -1,0 +1,13 @@
+version: '3.8'  # Specify the Docker Compose version
+
+services:
+
+  baxter-backend:
+    build:
+      context: .
+      args:
+        mysql_password: ${MYSQL_PASSWORD}
+    image: baxter-backend-img  # Name of the image
+    container_name: baxter-backend-ctnr
+    ports:
+      - "8000:8000"

@@ -25,16 +25,18 @@ RUN apt-get install -y default-libmysqlclient-dev pkg-config
 # Install the dependencies specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-
 # Copy the entire project directory into the container
 COPY . /app/
 
 # Expose port 8000 for the Django application
 EXPOSE 8000
 
-# this should come from CLI:  docker build --build-arg mysql_password=ajfghkaf Dockerfile
+# this should come from CLI:
+# bash> export MY_SECRET=sjhshj
+# bash> docker buildx build --load -t baxter-backend-img --build-arg mysql_password=$MY_SECRET  .
 ARG mysql_password="nopass"
 ENV MYSQL_PASSWORD=${mysql_password}
 # Command to run the Django development server
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["python", "manage.py", "runserver", "127.0.0.1:8000"]
+
 

@@ -1,6 +1,6 @@
 
 import { unstable_cache } from 'next/cache';
-import { revalidateTag } from 'next/cache';
+// import { revalidateTag } from 'next/cache';
 
 ///////////////////////////////////////////////////////
 // type definition section
@@ -72,17 +72,20 @@ export default async function Home() {
     if (menuItems === null) {
         menuItems = []
     }
-   // Invalidate cache for external data - here, this is for demo purposes
-    revalidateTag('external-data');
+    // Invalidate cache for external data - here, this is for demo purposes
+    //  not sure where this idea came from - this cannot be done at this point in the code
+    // " Error: Route / used "revalidateTag external-data" during render which is unsupported.
+    // To ensure revalidation is performed consistently it must always happen outside of renders and cached functions."
+    // revalidateTag('external-data');
 
     return (
         <div>
             <h1>Menu Items</h1>
-             <ul>
+            <ul>
                 {menuItems.map(item => (
                     <li key={item.id}>{item.mutation}</li>
                 ))}
             </ul>
-       </div>
+        </div>
     );
 }

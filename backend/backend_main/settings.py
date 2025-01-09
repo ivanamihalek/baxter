@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
+
 import os
 from pathlib import Path
 
@@ -90,10 +91,17 @@ DATABASES = {
         'PASSWORD': os.environ['MYSQL_PASSWORD'],
         # 'HOST': '127.0.0.1',   # an IP Address that your DB is hosted on
         # 'PORT': '3308',
-        # todo I am here
+        # # todo I am here
         # how am I supposed to know the IP and the port here?
-        'HOST': '10.89.1.2',
-        'PORT': '3306'
+        # try 'docker inspect baxter_mariadb' and parse the json it returns
+        # (os use whatever is the programmatic way to achieve the same)
+        # 'HOST': '10.89.1.2',
+        # 'PORT': '3306'
+        # apparently, for dockerized applications it is done like this:
+        # note that  'baxter-mariadb' build and run must be defined in the same docker-compose
+        'HOST': 'baxter-mariadb',  # Service name from docker-compose.yml
+        'PORT': '3306',  # Default MariaDB port
+
     }
 }
 
