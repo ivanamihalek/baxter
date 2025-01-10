@@ -1,5 +1,10 @@
 version: '2'  # Specify the Docker Compose version
 
+networks:
+  baxter-network:
+    driver: bridge
+    name: baxter-network
+
 services:
 
   baxter-mariadb:
@@ -11,6 +16,8 @@ services:
       - /storage/mariadb:/var/lib/mysql:Z
     environment: # this refers to the environment inside the container
       MARIADB_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    networks:
+      - baxter-network
 
   baxter-backend:
     build:
@@ -21,6 +28,8 @@ services:
     container_name: baxter-backend-ctnr
     ports:
       - "8000:8000"
+    networks:
+      - baxter-network
     depends_on:
       - baxter-mariadb
 
@@ -29,5 +38,12 @@ services:
       context: ./frontend  # Path to the frontend Dockerfile
     image: baxter-frontend-img  # Name of the image
     container_name: baxter-frontend-ctnr
+    environment: # this refers to the environment inside the container
+      MYHOSTNAME: baxter-frontend-ctnr
+
     ports:
       - "3000:3000"  # Map port 3000 of the container to port 3000 on the host
+    networks:
+      - baxter-network
+    depends_on:
+      - baxter-backend

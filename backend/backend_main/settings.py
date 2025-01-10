@@ -79,7 +79,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend_main.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
@@ -100,7 +99,7 @@ DATABASES = {
         # apparently, for dockerized applications it is done like this:
         # note that  'baxter-mariadb' build and run must be defined in the same docker-compose
         'HOST': 'baxter-mariadb',  # Service name from docker-compose.yml
-        'PORT': '3306',  # Default MariaDB port
+        'PORT': '3308',  # Default MariaDB port
 
     }
 }

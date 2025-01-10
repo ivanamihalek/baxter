@@ -64,8 +64,8 @@ const cachedFetchData = unstable_cache(
 export default async function Home() {
     let menuItems: AntibioResMutationItem[] = [];
     try {
-        menuItems = await cachedFetchData('http://127.0.0.1:8000/bad_bac_exercise/arm/');
-        // menuItems = await cachedFetchData('http://baxter-backend-ctnr:8000/bad_bac_exercise/arm/');
+        //menuItems = await cachedFetchData('http://127.0.0.1:8000/bad_bac_exercise/arm/');
+        menuItems = await cachedFetchData('http://baxter-backend-ctnr:8000/bad_bac_exercise/arm/');
     } catch (err) {
         console.error(err);
     }
