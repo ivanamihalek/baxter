@@ -52,7 +52,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['baxter-backend-ctnr']
 
 
 CORS_ALLOWED_ORIGINS = [
@@ -99,7 +99,7 @@ DATABASES = {
         # apparently, for dockerized applications it is done like this:
         # note that  'baxter-mariadb' build and run must be defined in the same docker-compose
         'HOST': 'baxter-mariadb',  # Service name from docker-compose.yml
-        'PORT': '3308',  # Default MariaDB port
+        'PORT': '3306',  # Default MariaDB port
 
     }
 }
