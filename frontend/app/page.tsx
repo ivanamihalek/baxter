@@ -1,20 +1,14 @@
-
 import { unstable_cache } from 'next/cache';
-// import { revalidateTag } from 'next/cache';
 
-///////////////////////////////////////////////////////
-// type definition section
-// Define the type for all possible JSON values
-// type JSONPrimitive = string | number | boolean | null; // Primitive JSON types
-// type JSONValue = JSONPrimitive | JSONValue[] | { [key: string]: JSONValue }; // Recursive definition for objects and arrays
-interface AntibioResMutationItem {
-    id: number; // or string, depending on your API response
-    mutation: string;
+// Define the type for the single JSON entry
+interface FingerprintAndDecoys {
+    fingerprint: string;
+    decoy1: string;
+    decoy2: string;
 }
 
 // Define the type for the data returned by fetchData
-type DataType = AntibioResMutationItem[]; //'any'; // Replace 'any' with your actual data type
-
+type DataType = FingerprintAndDecoys; // Change to a single object
 
 // Define an interface for the cache configuration
 interface CacheConfig<DataType> {
@@ -29,27 +23,22 @@ interface CacheOptions {
     tags?: string[];     // Optional array of tags for cache invalidation
 }
 
-//////////////////////////////////////////////////////
-
-async function fetchData(url: string):  Promise<DataType> {
-    // a debug hack, to convince oneself this happens on the server side
-    // MYHOSTNAME must be defined as the env variable at the place the server is started
-    const hostname = process.env.MYHOSTNAME;
-    console.log(`**** Greetings of the day. I am running on ${hostname}.`);
+async function fetchData(url: string): Promise<DataType> {
+ 
     const response = await fetch(url);
     if (!response.ok) {
         throw new Error('Network response was not ok.');
     }
+
     return response.json();
 }
-
 
 // Create a cached version of fetchData using unstable_cache with the defined interface
 const cacheConfig: CacheConfig<DataType> = {
     fetchData,
     keyParts: ['external-data'],
     options: {
-        revalidate: 2, // Cache for two secs () or any time you like
+        revalidate: 2, // Cache for two seconds or any time you like
         tags: ['external-data'],  // Tag for invalidation
     },
 };
@@ -60,31 +49,30 @@ const cachedFetchData = unstable_cache(
     cacheConfig.options
 );
 
-
 export default async function Home() {
-    let menuItems: AntibioResMutationItem[] = [];
+    let fpd: FingerprintAndDecoys | null = null; // Change to a single object or null
+
     try {
-        //menuItems = await cachedFetchData('http://127.0.0.1:8000/bad_bac_exercise/arm/');
-        menuItems = await cachedFetchData('http://baxter-backend-ctnr:8000/bad_bac_exercise/arm/');
+        fpd = await cachedFetchData('http://localhost:8000/bad_bac_exercise/fingerprint/');
+        // menuItem = await cachedFetchData('http://baxter-backend-ctnr:8000/bad_bac_exercise/arm/');
     } catch (err) {
         console.error(err);
     }
-    if (menuItems === null) {
-        menuItems = []
-    }
-    // Invalidate cache for external data - here, this is for demo purposes
-    //  not sure where this idea came from - this cannot be done at this point in the code
-    // " Error: Route / used "revalidateTag external-data" during render which is unsupported.
-    // To ensure revalidation is performed consistently it must always happen outside of renders and cached functions."
-    // revalidateTag('external-data');
 
+    // Handle case where menuItem is null
+    if (fpd === null) {
+        return <div>No data available.</div>; // Or handle it as you see fit
+    }
+
+    const seqArray = [fpd.fingerprint, fpd.decoy1, fpd.decoy2]
+    const shuffledSeqArray = seqArray.sort(() => Math.random() - 0.5);
     return (
         <div>
-            <h1>Menu Items</h1>
+            <h1>Sequence snippets</h1>
             <ul>
-                {menuItems.map(item => (
-                    <li key={item.id}>{item.mutation}</li>
-                ))}
+                    {shuffledSeqArray.map((item, index) => (
+                    <li key={index}>{item}</li> // Use index as key for simplicity here
+                    ))}
             </ul>
         </div>
     );
