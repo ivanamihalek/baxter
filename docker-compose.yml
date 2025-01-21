@@ -1,9 +1,4 @@
-version: '2'  # Specify the Docker Compose version
-
-networks:
-  baxter-network:
-    driver: bridge
-    name: baxter-network
+version: '3'  # Specify the Docker Compose version
 
 services:
 

@@ -1,0 +1,14 @@
+version: '3'  # Specify the Docker Compose version
+
+
+services:
+
+  baxter-mariadb:
+    image: mariadb:latest
+    container_name: baxter-mariadb
+    ports:
+      - "3308:3306"
+    volumes:
+      - /storage/mariadb:/var/lib/mysql:Z
+    environment: # this refers to the environment inside the container
+      MARIADB_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}

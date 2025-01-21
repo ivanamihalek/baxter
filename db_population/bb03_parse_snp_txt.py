@@ -5,7 +5,7 @@
 
 import json
 from pprint import pprint
-from bad_bac_exercise.models import CARDModel, Gene, AntibioticResMutation
+from models.bad_bac_models import CARDModel, Gene, AntibioticResMutation
 
 
 def process_card_snps(card_home: str) -> tuple[dict, dict]:

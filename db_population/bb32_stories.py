@@ -247,6 +247,7 @@ def story_to_pptx(arm_entry, pdb_entries, exercise_label, outdir):
     alignment_slide(prs, assmb_entry.refseq_assembly_id)
     variant_calling_slide(prs, contig,  sequenced_range)
     variants_slide(prs)
+
     ########################################
     # PLACING THE VARIANT IN GENOMIC CONTEXT
     # ---> task: find genomic location from the previous step using UCSC Genome Browser and some calculation - gene and protein location

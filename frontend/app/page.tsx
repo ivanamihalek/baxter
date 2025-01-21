@@ -33,7 +33,7 @@ interface CacheOptions {
 
 async function fetchData(url: string):  Promise<DataType> {
     // a debug hack, to convince oneself this happens on the server side
-    // MYHOSTNAME must be define as the env variable at the place the server is started
+    // MYHOSTNAME must be defined as the env variable at the place the server is started
     const hostname = process.env.MYHOSTNAME;
     console.log(`**** Greetings of the day. I am running on ${hostname}.`);
     const response = await fetch(url);
