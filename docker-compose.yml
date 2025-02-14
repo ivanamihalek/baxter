@@ -1,5 +1,11 @@
 version: '3'  # Specify the Docker Compose version
 
+networks:
+  baxter-network:
+    driver: bridge
+    name: baxter-network
+
+
 services:
 
   baxter-mariadb:

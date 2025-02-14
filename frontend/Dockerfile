@@ -7,7 +7,7 @@ FROM node:18-alpine AS build
 RUN apk add --no-cache libc6-compat
 
 # Install pnpm globally
-RUN npm install -g pnpm@9
+RUN npm install -g pnpm@10
 
 # The WORKDIR instruction sets the working directory for any
 # RUN, CMD, ENTRYPOINT, COPY and ADD instructions that follow.
