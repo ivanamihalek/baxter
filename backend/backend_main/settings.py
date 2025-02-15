@@ -1,5 +1,7 @@
 import os
 # pip install django-configurations
+# see https://django-configurations.readthedocs.io/en/stable/
+
 from configurations import Configuration
 
 class Base(Configuration):
@@ -35,9 +37,6 @@ class Base(Configuration):
         'corsheaders.middleware.CorsMiddleware',
     ]
 
-    CORS_ALLOWED_ORIGINS = [
-        "http://localhost:3000",  # Next.js frontend
-    ]
 
     ROOT_URLCONF = 'backend_main.urls'
 
@@ -97,6 +96,9 @@ class Development(Base):
     # development settings here...
     DEBUG = True
     ALLOWED_HOSTS = ['localhost']
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:3000",  # Next.js frontend
+    ]
     # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
     DATABASES = {
         'default': {
@@ -115,13 +117,16 @@ class Production(Base):
     # production settings here...
     DEBUG = False
     ALLOWED_HOSTS = ['baxter-backend-ctnr']
+    CORS_ALLOWED_ORIGINS = [
+        "http://baxter-backend-ctnr:3000",  # Next.js frontend
+    ]
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'baxter',
             'USER': 'baxter',
             'PASSWORD': os.environ['MYSQL_PASSWORD'],
-            'HOST': 'baxter-mariadb',  # Service name from docker-compose.yml
+            'HOST': 'baxter-mariadb',  # Service name from docker-compose.prod.yml
             'PORT': '3306',  # Default MariaDB port
 
         }

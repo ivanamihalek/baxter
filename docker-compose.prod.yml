@@ -27,6 +27,9 @@ services:
         mysql_password: ${MYSQL_PASSWORD}
     image: baxter-backend-img  # Name of the image
     container_name: baxter-backend-ctnr
+    environment:
+        DJANGO_CONFIGURATION: Production
+        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "8000:8000"
     networks:
@@ -41,6 +44,7 @@ services:
     container_name: baxter-frontend-ctnr
     environment: # this refers to the environment inside the container
       MYHOSTNAME: baxter-frontend-ctnr
+
 
     ports:
       - "3000:3000"  # Map port 3000 of the container to port 3000 on the host
