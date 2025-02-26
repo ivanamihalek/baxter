@@ -5,6 +5,12 @@
 import re
 from pprint import pprint
 
+# Django specific settings - needed only in scripts that use django-orm
+import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+import django
+django.setup()
+
 import pandas as pd
 import requests
 
@@ -15,7 +21,7 @@ from models.bad_bac_models import UCSCAssembly
 from django.db import connection
 
 
-def douwnload_html_source(url):
+def download_html_source(url):
     # Fetch the HTML content from the URL
     response = requests.get(url)
 
@@ -28,7 +34,7 @@ def douwnload_html_source(url):
 
 def download_ucsc_bac_genomes_info(ucsc_genomes_file):
 
-    response = douwnload_html_source("https://hgdownload.soe.ucsc.edu/hubs/bacteria/index.html")
+    response = download_html_source("https://hgdownload.soe.ucsc.edu/hubs/bacteria/index.html")
 
     # Parse the HTML content using BeautifulSoup
     cleaned_text = response.text.replace('&nbsp;', ' ')
@@ -91,6 +97,10 @@ def run():
     df.columns = df.columns.str.lower()
     # remove all rows that do not have a proper accession identifier
     df = df[df['ncbi_accession_number'].str.startswith('ASM')]
+    # come rows have duplicate value in ncbi_accession_number
+    # not sure what to make of it, so I'll just drop all but the first one
+    df =  df.drop_duplicates(subset='ncbi_accession_number', keep="first")
+
     # Convert date column to proper format
     df['assembly_date'] = pd.to_datetime(df['assembly_date']).dt.date
     # Convert DataFrame to dictionary format
