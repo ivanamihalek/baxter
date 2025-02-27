@@ -1,9 +1,4 @@
 #! /usr/bin/env python
-# this is meant to be run with
-# ./manage.py runscript bb01_ucsc_bac_genomes
-# in that case django will take care of the paths and also check for migrations and such
-import re
-from pprint import pprint
 
 # Django specific settings - needed only in scripts that use django-orm
 import os

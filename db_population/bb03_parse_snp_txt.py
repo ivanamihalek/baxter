@@ -1,7 +1,10 @@
 #! /usr/bin/env python
-# this is meant to be run with
-# ./manage.py runscript bb03_parse_snp_txt
-# in that case django will take care of the paths and also check for migrations and such
+# Django specific settings - needed only in scripts that use django-orm
+import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+import django
+django.setup()
+
 
 import json
 from pprint import pprint
@@ -21,12 +24,11 @@ def process_card_snps(card_home: str) -> tuple[dict, dict]:
         if fields[3] != 'single resistance variant': continue
         if fields[2] != 'protein variant model': continue
         if len(fields[1]) < 5: continue  # not sure what these are
-        card_short_name = fields[-1]
+
+        card_short_name = fields[5]
         if len(card_short_name.split("_")) < 3:  continue  # not sure what these are either
-
         if card_short_name not in mutations: mutations[card_short_name] = []
-        mutations[card_short_name].append(fields[-2])
-
+        mutations[card_short_name].append(fields[4])
         if card_short_name in card_short2card_description:
             if card_short2card_description[card_short_name] != fields[1]:
                 print(f"unexpected multiple descriptions for a short CARD name:")
@@ -38,7 +40,9 @@ def process_card_snps(card_home: str) -> tuple[dict, dict]:
 
     return card_short2card_description, mutations
 
-
+# run is the leftover from the time this script was run with
+# manaage.py runscript - now we just use django orm, to
+# be sure that the db_population and backend are on the same wavelength
 def run():
     card_home = "/storage/databases/CARD-data"
     (card_short2card_description, mutations) = process_card_snps(card_home)
