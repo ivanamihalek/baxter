@@ -1,10 +1,13 @@
 #! /usr/bin/env python
-# this is meant to be run with
-# ./manage.py runscript bb06
-# in that case django will take care of the paths and also check for migrations and such
+
+import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+import django
+django.setup()
+
 import json
 
-from bad_bac_exercise.models import CARDModel, Drug, Publication
+from models.bad_bac_models import CARDModel, Drug, Publication
 
 def parse_aro_obo():
     card_home = "/storage/databases/CARD-data"
@@ -33,13 +36,16 @@ def parse_aro_obo():
         elif reading:
             if line[:len(linestart := 'id: ARO:')] == linestart:
                 aro_id = line.replace(linestart, '')
-            elif line[:len(linestart := 'xref: pubchem.compound:')] == linestart:
+            elif line[:len(linestart := 'xref: PubChem:')] == linestart:
                 pubchem = line.replace(linestart, '')
+                # print(aro_id, pubchem)
             elif "EXACT CARD_Short_Name" in line:
                 card_name_short = line.split()[1].replace('"', '')
             elif "PMID:" in (possible_pmid_list := line.split('[')[-1]):
                 pmid_list = possible_pmid_list.replace(']', '').split(",")
-                pubmed_ids = [int(p.replace("PMID:", '')) for p in pmid_list]
+                # print(aro_id, pmid_list)
+                # I have seen mistakes so that, for example, the ISBN ended up in the PMID list
+                pubmed_ids = [int(p.replace("PMID:", '')) for p in pmid_list if "PMID" in p]
 
     inf.close()
     return aro_id2pubchem, card_name2pubmed_ids
@@ -58,7 +64,7 @@ def run():
     for card_model in CARDModel.objects.all():
         if card_model.card_name not in card_name2pubmed_ids:
             print(f"pubmed ids not found for {card_model.card_name}")
-            exit()
+            continue
         for pmid in card_name2pubmed_ids[card_model.card_name]:
             (publication_entry, was_created) = Publication.objects.update_or_create(pubmed_id=pmid)
             card_model.publications.add(publication_entry)

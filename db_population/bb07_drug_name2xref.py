@@ -4,12 +4,16 @@
 # in that case django will take care of the paths and also check for migrations and such
 from pprint import pprint
 
+import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+import django
+django.setup()
+
 import pubchempy as pcp
 import requests
-
+from models.bad_bac_models import Drug
 
 def run():
-    from bad_bac_exercise.models import Drug
 
     for drug in Drug.objects.all():
         if not drug.is_discrete_structure: continue
@@ -68,4 +72,4 @@ def test_run():
 
 #######################
 if __name__ == "__main__":
-    test_run()
+    run()

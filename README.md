@@ -22,7 +22,7 @@ export MYSQL_ROOT_PASSWORD=something
 docker compose up -d baxter-frontend
 ```
 
-Note that the sub-commands `create` and `start` can be sued to decouple these two operations:
+Note that the sub-commands `create` and `start` can be used to decouple these two operations:
 ```bash
 docker compose create baxter-frontend
 docker compose start baxter-backend
@@ -31,15 +31,15 @@ docker compose start baxter-backend
 ## Pitfalls
 
 If using [django-configurations](https://django-configurations.readthedocs.io/en/stable/)
-to separate the dev and prod settings,  make sure that the correspondind docker-compose.yml file
-define teh env variable `DJANGO_CONFIGURATION` as `Production`
+to separate the dev and prod settings,  make sure that the corresponding docker-compose.yml file
+defines the env variable `DJANGO_CONFIGURATION` as `Production`
 ```yaml
     environment:
         DJANGO_CONFIGURATION: Production
         MYSQL_PASSWORD: ${MYSQL_PASSWORD}
 ```
 Also, in the settings, in the class `Production`  and in the class `Developent`
-the CORS_AALLOWED_ORIGINS should be different:
+the CORS_ALLOWED_ORIGINS should be different:
 ```python
 class Development(Base):
     # development settings here...

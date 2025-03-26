@@ -1,12 +1,13 @@
 #! /usr/bin/env python
-# this is meant to be run with
-# ./manage.py runscript bb03_parse_card_json
-# in that case django will take care of the paths and also check for migrations and such
+import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+import django
+django.setup()
 
 import json
 from pprint import pprint
 from Bio.Seq import Seq
-from bad_bac_exercise.models import CARDModel, Gene, AntibioticResMutation, Drug, DrugClass
+from models.bad_bac_models import CARDModel, Gene, AntibioticResMutation, Drug, DrugClass
 
 
 # reconstructing this, for example:
@@ -127,12 +128,12 @@ def run():
         (drug_entries, drug_class_entries) = store_drug_info(card_dict)
         # mutation to drug and drug class mapping
         for abr in AntibioticResMutation.objects.filter(gene=gene_entry):
-            print(abr.mutation)
+            # print(abr.mutation)
             for drug_entry in drug_entries:
-                print(drug_entry.name)
+                # print(drug_entry.name)
                 abr.drugs_affected.add(drug_entry)
             for drug_class_entry in drug_class_entries:
-                print(drug_class_entry.name)
+                # print(drug_class_entry.name)
                 abr.drug_classes_affected.add(drug_class_entry)
 
 

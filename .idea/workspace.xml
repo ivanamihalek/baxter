@@ -5,14 +5,33 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1a4dffe5-e833-4da2-9021-43a6dfe9fcf7" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/.idea/backend.iml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.idea/backend.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/backend_main/asgi.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/backend_main/asgi.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/backend_main/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/backend_main/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/backend_main/wsgi.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/backend_main/wsgi.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.prod.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/bad_bac_exercise/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/bad_bac_exercise/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/bad_bac_exercise/migrations/0002_publication_cardmodel_publications.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/bad_bac_exercise/migrations/0003_alter_cardmodel_publications.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/bad_bac_exercise/migrations/0004_alter_cardmodel_publications.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/bad_bac_exercise/migrations/0005_pdb2gene_gene_seq_aligned_pdb2gene_pdb_chain_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/bad_bac_exercise/migrations/0006_alter_pdb2gene_pdb_chain.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/bad_bac_exercise/migrations/0007_pdb2gene_gene_seq_end_pdb2gene_gene_seq_start_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/bad_bac_exercise/migrations/0008_pdb2drug_alter_pdbstructure_drugs.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/bad_bac_exercise/migrations/0009_alter_pdb2drug_drug_name_in_pdb.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/bad_bac_exercise/migrations/0010_alter_pdb2drug_drug_name_in_pdb.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/bad_bac_exercise/migrations/0011_alter_pdb2mutation_dist_to_drug.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/bad_bac_exercise/migrations/0012_alter_pdb2mutation_dist_to_drug.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/bad_bac_exercise/migrations/0013_alter_ucscassembly_refseq_assembly_id.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/bad_bac_exercise/migrations/0014_gene2ucscassembly_assembly_end_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/bad_bac_exercise/migrations/0015_antibioticresmutation_assemblies.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/bad_bac_exercise/migrations/0016_rename_assembly_end_gene2ucscassembly_end_on_contig_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/bad_bac_exercise/migrations/0017_remove_gene2ucscassembly_start_less_than_end_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/bad_bac_exercise/migrations/0018_decoy.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/bad_bac_exercise/migrations/0019_alter_decoy_species_name.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/bad_bac_exercise/migrations/0020_alter_decoy_table_comment.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/bad_bac_exercise/migrations/0021_alter_decoy_table_comment_alter_decoy_source.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/bad_bac_exercise/migrations/0022_fingerprint.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/bad_bac_exercise/migrations/0023_antibioticresmutation_comment_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/db_population/bb05_parse_card_json.py" beforeDir="false" afterPath="$PROJECT_DIR$/db_population/bb05_parse_card_json.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db_population/bb06_parse_aro_obo.py" beforeDir="false" afterPath="$PROJECT_DIR$/db_population/bb06_parse_aro_obo.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/app/page.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/page.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -50,8 +69,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-e768b9ed790e-JavaScript-PY-243.21565.199" />
-        <option value="bundled-python-sdk-cab1f2013843-4ae2d6a61b08-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-243.21565.199" />
+        <option value="bundled-js-predefined-d6986cc7102b-76f8388c3a79-JavaScript-PY-243.24978.54" />
+        <option value="bundled-python-sdk-91e3b7efe1d4-466328ff949b-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-243.24978.54" />
       </set>
     </attachedChunks>
   </component>
@@ -65,6 +84,7 @@
       <updated>1739568441115</updated>
       <workItem from="1739568583367" duration="5591000" />
       <workItem from="1739649678558" duration="10207000" />
+      <workItem from="1742927453162" duration="9080000" />
     </task>
     <servers />
   </component>

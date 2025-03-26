@@ -63,7 +63,8 @@ export default async function Home() {
 
     try {
         // todo - set this address somehow so it's different in production and dev
-        fpd = await cachedFetchData('http://baxter-backend-ctnr:8000/bad_bac_exercise/fingerprint');
+        // fpd = await cachedFetchData('http://baxter-backend-ctnr:8000/bad_bac_exercise/fingerprint');
+        fpd = await cachedFetchData('http://localhost:8000/bad_bac_exercise/fingerprint');
     } catch (err) {
         console.error(err);
     }
