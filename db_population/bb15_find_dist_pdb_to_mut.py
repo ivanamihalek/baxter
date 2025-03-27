@@ -1,7 +1,10 @@
 #! /usr/bin/env python
-# this is meant to be run with
-# ./manage.py runscript bb03_parse_card_json
-# in that case django will take care of the paths and also check for migrations and such
+
+import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+import django
+django.setup()
+
 
 import os
 
@@ -9,7 +12,7 @@ import numpy as np
 from Bio.PDB import PDBParser, PDBList, Select
 
 from utils import is_nonempty_file
-
+from models.bad_bac_models import AntibioticResMutation, Pdb2Gene, Pdb2Drug, Pdb2Mutation
 
 def download(pdbdir, pdb_id):
 
@@ -20,15 +23,22 @@ def download(pdbdir, pdb_id):
     else:
         pdb_list = PDBList()
         try:
-            pdb_filename = pdb_list.retrieve_pdb_file(pdb_id, pdir=pdbdir, file_format="pdb")
+            returned_pdb_fnm = pdb_list.retrieve_pdb_file(pdb_id, pdir=pdbdir, file_format="pdb")
+            print(f"retrieved {returned_pdb_fnm}")
+            if not is_nonempty_file(returned_pdb_fnm):
+                print(f"{returned_pdb_fnm} does not exist or is empty")
+                return ""
+
+            if returned_pdb_fnm[-3:] == 'ent':
+                print(f"renaming to {pdbfile}")
+                os.rename(returned_pdb_fnm, pdbfile)
+
         except Exception as e:
-            # print(e)
-            return ""
+            print(e)
+            exit(1)
         if not is_nonempty_file(pdbfile):
-            return ""
-        # print(f"Downloaded file: {pdb_filename}")
-        os.rename(pdb_filename, pdbfile)
-        # print(f"renamed to: {pdbfile}")
+            print(f"{pdbfile} seems to be empty")
+            exit(1)
 
     return pdbfile
 
@@ -38,6 +48,7 @@ def ligand_distance(pdb_id, ligand_res_name, query_chain_id, protein_res_id) -> 
     parser = PDBParser(QUIET=True)
     pdbfile = download("/storage/databases/pdb/structures", pdb_id)
     if not pdbfile:
+        print(f"pdbfile download failed for {pdb_id} ")
         return -1
     if not is_nonempty_file(pdbfile):
         print(f"{pdbfile} seems to be empty")
@@ -81,7 +92,7 @@ def ligand_distance(pdb_id, ligand_res_name, query_chain_id, protein_res_id) -> 
 
 
 def run():
-    from bad_bac_exercise.models import AntibioticResMutation, Pdb2Gene, Pdb2Drug, Pdb2Mutation
+
 
     scratch = "/home/ivana/scratch/baxter/blast"
 
@@ -90,7 +101,11 @@ def run():
     distinct_genes = set()
     total_candidates = 0
     for abr_mutation in AntibioticResMutation.objects.all():
-        mutation_pos = int(abr_mutation.mutation[1:-1])
+        try:
+            mutation_pos = int(abr_mutation.mutation[1:-1])
+        except:
+            print(f"unexpected mutation format {mutation_pos}")
+            continue
         mutation_from = abr_mutation.mutation[0]
         gene_name = abr_mutation.gene.name
         drugs_affected = list(abr_mutation.drugs_affected.all())
@@ -161,8 +176,8 @@ def run():
 
 def run_test():
     distance = ligand_distance(pdb_id="1c14", ligand_res_name="TCL", query_chain_id="A", protein_res_id=93)
-    print(distance)
+    print(f"distance of the ligand TCL to the residue 93 in 1c14 is {distance: .2f}")
 
 #######################
 if __name__ == "__main__":
-    run_test()
+    run()

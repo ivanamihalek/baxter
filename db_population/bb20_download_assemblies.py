@@ -1,11 +1,14 @@
 #! /usr/bin/env python
-# this is meant to be run with
-# ./manage.py runscript bb03_parse_card_json
-# in that case django will take care of the paths and also check for migrations and such
+
+import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+import django
+django.setup()
+
 import os
 import wget
 import subprocess
-from bad_bac_exercise.models import UCSCAssembly
+from models.bad_bac_models import UCSCAssembly
 
 
 def download_all():
@@ -48,8 +51,6 @@ def run():
 
     create_contents_files()
     # subprocess.run(f"makeblastdb -in {all_fa} -dbtype nucl ", shell=True)
-
-    pass
 
 
 #######################

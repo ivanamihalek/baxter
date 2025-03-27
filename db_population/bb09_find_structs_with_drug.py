@@ -1,10 +1,13 @@
 #! /usr/bin/env python
-# this is meant to be run with
-# ./manage.py runscript bb08_...
-# in that case django will take care of the paths and also check for migrations and such
 
-from rcsbsearchapi.search import ChemSimilarityQuery
+import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+import django
+django.setup()
 
+
+from rcsbapi.search import ChemSimilarityQuery
+from models.bad_bac_models import Drug, PDBStructure
 
 def find_pdb_by_smiles(smiles) -> list[str]:
 
@@ -19,7 +22,9 @@ def find_pdb_by_smiles(smiles) -> list[str]:
     except Exception as e:
         print(f"Problem running chem similarity query for {smiles}: {e}")
         return []
-    if not results: return []
+    if not results:
+        print(f"No results in RCSB PDB for {smiles}")
+        return []
 
     results_dict = results.to_dict()
     if not results_dict: return []
@@ -33,10 +38,8 @@ def find_pdb_by_smiles(smiles) -> list[str]:
 
 def run():
 
-    from bad_bac_exercise.models import Drug, PDBStructure
-
     for drug in Drug.objects.all():
-        if not drug.is_discrete_structure: continue
+        # if not drug.is_discrete_structure: continue
         pdbids = find_pdb_by_smiles(drug.canonical_smiles)
         # todo  -check ir therei any peptide ther at all
         # pdb has some NMR stuff with drugs only, and such, see for example 1T5N
@@ -60,4 +63,4 @@ def run_test():
 
 #######################
 if __name__ == "__main__":
-    run_test()
+    run()

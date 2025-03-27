@@ -1,14 +1,15 @@
 #! /usr/bin/env python
-# this is meant to be run with
-# ./manage.py runscript bb03_parse_card_json
-# in that case django will take care of the paths and also check for migrations and such
-import json
+
+import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+import django
+django.setup()
+
 from pprint import pprint
 
-import numpy as np
 import requests
-
 from rdkit import Chem
+from models.bad_bac_models import PDBStructure, Drug, Pdb2Drug
 
 def to_canonical(smiles):
     return Chem.MolToSmiles(Chem.MolFromSmiles(smiles), True)
@@ -112,15 +113,14 @@ def get_drug_code_by_smiles (pdb_id, query_smiles) -> tuple[str, str]:
 
 
 def run():
-    from bad_bac_exercise.models import PDBStructure, Drug, Pdb2Drug
 
     for pdb_2_drug_entry in Pdb2Drug.objects.all():
         # if pdb_2_drug_entry.drug_residue_name is not None and pdb_2_drug_entry.drug_name_in_pdb is not None: continue
-        pdb_id = pdb_2_drug_entry.pdb_id
+        pdb_id  = pdb_2_drug_entry.pdb_id
         drug_id = pdb_2_drug_entry.drug_id
-        pdb_entry  = PDBStructure.objects.get(pk=pdb_id)
+        pdb_entry = PDBStructure.objects.get(pk=pdb_id)
         if not pdb_entry.genes.all():
-            print(f"{pdb_entry.pdb_id} does not seem to map to a gene of interest here")
+            # print(f"{pdb_entry.pdb_id} does not seem to map to a gene of interest here")
             continue
         drug_entry = Drug.objects.get(pk=drug_id)
         (drug_name, pdb_code) = get_drug_code_by_smiles(pdb_entry.pdb_id, drug_entry.canonical_smiles)
@@ -141,5 +141,5 @@ def run_test():
 
 #######################
 if __name__ == "__main__":
-    run_test()
+    run()
 

@@ -1,8 +1,4 @@
 #! /usr/bin/env python
-# this is meant to be run with
-# ./manage.py runscript bb03_parse_card_json
-# in that case django will take care of the paths and also check for migrations and such
-from pprint import pprint
 
 import os
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')

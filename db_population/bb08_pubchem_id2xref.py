@@ -19,7 +19,7 @@ def to_canonical(smiles):
 def run():
 
     for drug in Drug.objects.all():
-        if not drug.is_discrete_structure: continue
+        # if not drug.is_discrete_structure: continue
         # if drug.canonical_smiles is not None: continue
         print(drug.pubchem_id, drug.name)
         # Search for the compound by pubchem_id
@@ -48,7 +48,7 @@ def run():
         # it looks like the  canonical smiles tha I getting here are not the same canonical smiles
         # that one can get from rdkit and in PDB entries
         rdkit_canonical = to_canonical(compounds[0].canonical_smiles)
-        if drug.canonical_smiles != rdkit_canonical:
+        if drug.canonical_smiles and drug.canonical_smiles != rdkit_canonical:
             print(f"rdkit canonicalized smiles for Pubchem id {drug.pubchem_id} does not match the one I already have:")
             print(f"{drug.pubchem_id}: {rdkit_canonical}")
             print(f"already have: {drug.canonical_smiles}  - saving anyway")
@@ -69,8 +69,7 @@ def test_run():
     for pubchem_id in pubchem_ids:
         # Search for the compound by pubchem_id
         compounds = pcp.get_compounds(pubchem_id)
-
-        # If compounds were found, retrieve the InChIKey
+         # If compounds were found, retrieve the InChIKey
         if compounds:
             inchi_keys[pubchem_id] = compounds[0].inchikey  # Get the first compound's InChIKey
             smiles[pubchem_id] =  compounds[0].canonical_smiles

@@ -1,17 +1,20 @@
 #! /usr/bin/env python
-# this is meant to be run with
-# ./manage.py runscript bb03_parse_card_json
-# in that case django will take care of the paths and also check for migrations and such
+
+import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+import django
+django.setup()
+
 
 import subprocess
 from glob import glob
 
 from Bio.Blast import NCBIXML
-from bad_bac_exercise.models import AntibioticResMutation, Pdb2Mutation, PDBStructure
-from bad_bac_exercise.models import UCSCAssembly, Gene2UCSCAssembly
+from models.bad_bac_models import AntibioticResMutation, Pdb2Mutation, PDBStructure
+from models.bad_bac_models import UCSCAssembly, Gene2UCSCAssembly
 
 
-from db_population.utils import is_nonempty_file
+from utils import is_nonempty_file
 
 
 def map_contigs_to_assembly(blastdb_home):
@@ -29,7 +32,7 @@ def run_blast(blastdb_home, query_file, output_file):
     # Define parameters
     db = f"{blastdb_home}/uscs_bac_genomes.fa"
 
-    print(f"running blastp")
+    print(f"running blastn on {db} with {query_file} as query")
     # Run the blastp command
     subprocess.run(["blastn", "-db", db, "-query", query_file, "-out", output_file, "-outfmt", "5"])
 
@@ -85,6 +88,7 @@ def parse_blast_results(gene_entry, blast_results_file, contigs2assembly):
 
 
 def run():
+    # todo: check that the database exists and is formatted
     blastdb_home = "/storage/databases/ucsc/bacterial_genomes"
     scratch = "/home/ivana/scratch/baxter/blast_against_genomes"
 
@@ -93,7 +97,7 @@ def run():
         distance = pdb2mut.dist_to_drug
         pdb_entry = PDBStructure.objects.get(pk=pdb2mut.pdb_id)
         abr_entry = AntibioticResMutation.objects.get(pk=pdb2mut.antibio_res_mutation_id)
-        # print(f"{pdb_entry.pdb_id}   {abr_entry.gene.name}   {abr_entry.mutation}   {distance:.1f}")
+        print(f"{pdb_entry.pdb_id}   {abr_entry.gene.name}   {abr_entry.mutation}   {distance:.1f}")
         genes.add(abr_entry.gene)
 
     contigs2assembly = map_contigs_to_assembly(blastdb_home)

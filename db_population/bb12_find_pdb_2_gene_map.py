@@ -1,23 +1,23 @@
 #! /usr/bin/env python
-# this is meant to be run with
-# ./manage.py runscript bb03_parse_card_json
-# in that case django will take care of the paths and also check for migrations and such
-import json
-from pprint import pprint
 
-import requests
-import pandas as pd
+import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+import django
+django.setup()
 
 import subprocess
 from Bio.Blast import NCBIXML
 
-from .utils import is_nonempty_file
-from bad_bac_exercise.models import CARDModel, Gene, AntibioticResMutation, Drug, DrugClass, PDBStructure, Pdb2Gene
+from utils import is_nonempty_file
+from models.bad_bac_models import CARDModel, Gene, AntibioticResMutation, Drug, DrugClass, PDBStructure, Pdb2Gene
 
 
 def run_blast(query_file, output_file):
     # Define parameters
     db = "/storage/databases/pdb/blast/pdb_seqres.fasta"
+    if not os.path.exists(db):
+        print(f"{db} not found")
+        exit()
 
     print(f"running blastp")
     # Run the blastp command
