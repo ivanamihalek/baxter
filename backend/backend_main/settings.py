@@ -95,7 +95,7 @@ class Base(Configuration):
 class Development(Base):
     # development settings here...
     DEBUG = True
-    ALLOWED_HOSTS = ['localhost']
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
     CORS_ALLOWED_ORIGINS = [
         "http://localhost:3000",  # Next.js frontend
     ]

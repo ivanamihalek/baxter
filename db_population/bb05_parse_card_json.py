@@ -3,10 +3,16 @@
 # ./manage.py runscript bb03_parse_card_json
 # in that case django will take care of the paths and also check for migrations and such
 
+import os
+import django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+django.setup()
+
+
 import json
 from pprint import pprint
 from Bio.Seq import Seq
-from bad_bac_exercise.models import CARDModel, Gene, AntibioticResMutation, Drug, DrugClass
+from models.bad_bac_models import CARDModel, Gene, AntibioticResMutation, Drug, DrugClass
 
 
 # reconstructing this, for example:
@@ -109,7 +115,7 @@ def store_drug_info(card_dict: dict):
 
 
 def run():
-    card_home = "/storage/databases/CARD-data"
+    card_home = "/storage/databases/CARD"
     # it helps to keep in mind that 'card' here stands for the 'CARD' database name
     # The Comprehensive Antibiotic Resistance Database
     jsonfile = f"{card_home}/card.json"
@@ -122,6 +128,9 @@ def run():
             card_entry = CARDModel.objects.get(card_name=card_name)
         except CARDModel.DoesNotExist:
             continue
+
+        pprint(card_dict)
+        exit()
 
         gene_entry = store_gene_info(card_entry, card_dict)
         (drug_entries, drug_class_entries) = store_drug_info(card_dict)

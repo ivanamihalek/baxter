@@ -1,15 +1,22 @@
 #! /usr/bin/env python
-# this is meant to be run with
+# this was meant to be run with
 # ./manage.py runscript bb03_parse_snp_txt
-# in that case django will take care of the paths and also check for migrations and such
+# in that case, django will take care of the paths and also check for migrations and such
+# For some reason I started running these as their own scripts.
 
-import json
-from pprint import pprint
+import os
+import django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+django.setup()
+
 from models.bad_bac_models import CARDModel, Gene, AntibioticResMutation
 
 
 def process_card_snps(card_home: str) -> tuple[dict, dict]:
     snp_file = f"{card_home}/snps.txt"
+    if not(os.path.exists(snp_file)):
+        raise FileNotFoundError(f"{snp_file} not found")
+    print("Reading snps.txt...")
     inf = open(snp_file)
     ct = 0
 
@@ -21,11 +28,11 @@ def process_card_snps(card_home: str) -> tuple[dict, dict]:
         if fields[3] != 'single resistance variant': continue
         if fields[2] != 'protein variant model': continue
         if len(fields[1]) < 5: continue  # not sure what these are
-        card_short_name = fields[-1]
+        card_short_name = fields[5]
         if len(card_short_name.split("_")) < 3:  continue  # not sure what these are either
 
         if card_short_name not in mutations: mutations[card_short_name] = []
-        mutations[card_short_name].append(fields[-2])
+        mutations[card_short_name].append(fields[4])
 
         if card_short_name in card_short2card_description:
             if card_short2card_description[card_short_name] != fields[1]:
@@ -40,16 +47,28 @@ def process_card_snps(card_home: str) -> tuple[dict, dict]:
 
 
 def run():
-    card_home = "/storage/databases/CARD-data"
+
+    card_home = "/storage/databases/CARD"
     (card_short2card_description, mutations) = process_card_snps(card_home)
     for card_short, descr in card_short2card_description.items():
         gene_name = card_short.split("_")[1]
         print(len(card_short), card_short, descr, gene_name, mutations[card_short])
+
         (card_entry, was_created) = CARDModel.objects.update_or_create(card_name=card_short)
         if was_created:
+            print("card created")
             card_entry.card_description = descr
             card_entry.save()
-
+        else:
+            print("card updated")
+        # TODO: get rid of this part of the code and of the gene table
+        # instead, in the following script bb005
+        # extact the following info int the model table"
+        # CARD_short_name, NCBI_taxonomy_name, dna_accession, protein_accession, snps (there might be several),
+        # in bb006 dill in pubchemid, nad create arbm2pubmed mapping table
+        # collect uniqe protein seqs and blast against PDB
+        # for the hits check in metadata id they have a co-crystalized molecule
+        # -? smiles search for pubchem id - if there is hit model2structure map
         (gene_entry, was_created) = Gene.objects.update_or_create(name=gene_name)
         for mutation in mutations[card_short]:
             fields = {'mutation': mutation, 'gene': gene_entry}
