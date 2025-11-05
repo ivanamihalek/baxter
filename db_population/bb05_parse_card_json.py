@@ -64,7 +64,7 @@ def store_gene_info(card_entry: CARDModel, card_dict: dict) -> Gene:
     card_name = card_entry.card_name
     number_of_seqs = len(card_dict["model_sequences"]["sequence"])
     if number_of_seqs > 1:
-        print(f"A problem: {card_name} has {number_of_seqs} associated with the protein.")
+        print(f"A problem: {card_name} has {number_of_seqs} seqs associated with the protein.")
         print(f"(At the time of this writing this problem did not exist.)")
         exit()
 
@@ -115,6 +115,8 @@ def store_drug_info(card_dict: dict):
 
 
 def run():
+    print("Creating or updating entries for drugs adn drug_classes")
+    print("Creating through tables abrm_2_drug, abrm_2_drug_class")
     card_home = "/storage/databases/CARD"
     # it helps to keep in mind that 'card' here stands for the 'CARD' database name
     # The Comprehensive Antibiotic Resistance Database
@@ -128,9 +130,6 @@ def run():
             card_entry = CARDModel.objects.get(card_name=card_name)
         except CARDModel.DoesNotExist:
             continue
-
-        pprint(card_dict)
-        exit()
 
         gene_entry = store_gene_info(card_entry, card_dict)
         (drug_entries, drug_class_entries) = store_drug_info(card_dict)

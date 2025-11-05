@@ -61,12 +61,11 @@ def run():
             card_entry.save()
         else:
             print("card updated")
-        # TODO: get rid of this part of the code and of the gene table
-        # instead, in the following script bb005
-        # extact the following info int the model table"
+        # TODO: in the following script bb005
+        # extract the following info int the model table:show tables
         # CARD_short_name, NCBI_taxonomy_name, dna_accession, protein_accession, snps (there might be several),
         # in bb006 dill in pubchemid, nad create arbm2pubmed mapping table
-        # collect uniqe protein seqs and blast against PDB
+        # collect unique protein seqs and blast against PDB
         # for the hits check in metadata id they have a co-crystalized molecule
         # -? smiles search for pubchem id - if there is hit model2structure map
         (gene_entry, was_created) = Gene.objects.update_or_create(name=gene_name)
@@ -74,6 +73,7 @@ def run():
             fields = {'mutation': mutation, 'gene': gene_entry}
             (mutation_entry, was_created) = AntibioticResMutation.objects.update_or_create(**fields)
             mutation_entry.card_models.add(card_entry)
+
 
 
 #######################
