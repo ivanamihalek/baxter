@@ -8,7 +8,7 @@ import os
 import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
 django.setup()
-
+import pubchempy as pcp
 from models.bad_bac_models import CARDModel, Drug, Publication
 
 def parse_aro_obo():

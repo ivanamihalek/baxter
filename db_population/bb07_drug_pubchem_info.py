@@ -2,18 +2,24 @@
 # this is meant to be run with
 # ./manage.py runscript bb03_parse_card_json
 # in that case django will take care of the paths and also check for migrations and such
+
+import os
+from sys import argv
+
+import django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+django.setup()
+
 from pprint import pprint
 
 import pubchempy as pcp
 import requests
 
+from models.bad_bac_models import Drug
+
 
 def run():
-    from bad_bac_exercise.models import Drug
-
     for drug in Drug.objects.all():
-        if not drug.is_discrete_structure: continue
-        if drug.canonical_smiles is not None: continue
         print(drug.name)
         # Search for the compound by name
         compounds = pcp.get_compounds(drug.name, 'name')
@@ -23,8 +29,8 @@ def run():
             # some names do not correspond to a discrete structure, e.g. polymyxin B
             # (In chemistry, the term "discrete structure" refers to distinct, well-defined arrangements
             # of atoms or molecules that can be clearly identified and classified.)
-
             continue
+
         elif number_of_comps_found > 1:
             # these are presumably isomers - make sure they all lead to the same canonical smiles
             if any([c.canonical_smiles != compounds[0].canonical_smiles for c in compounds[1:]]):
@@ -39,8 +45,9 @@ def run():
                 continue
         drug.inchi_key = compounds[0].inchikey
         drug.canonical_smiles = compounds[0].canonical_smiles
+        drug.is_discrete_structure = compounds[0].covalent_unit_count == 1
         drug.save()
-        print(compounds[0].inchikey, compounds[0].canonical_smiles)
+        print(compounds[0].inchikey, compounds[0].canonical_smiles, drug.is_discrete_structure)
 
 
 def test_run():
@@ -65,7 +72,16 @@ def test_run():
         print("************************")
         print(f"{name}: {inchi_key}  {smiles[name]}")
 
+def main():
+    if len(argv) < 2:
+        exit("Tell me what to do - test or run?")
+    if argv[1] == 'run':
+        run()
+    elif argv[1] == 'test':
+        test_run()
+    else:
+        print(f"I don't know what is '{argv[1]}'. What should I do - test or run?")
 
 #######################
 if __name__ == "__main__":
-    test_run()
+    main()
