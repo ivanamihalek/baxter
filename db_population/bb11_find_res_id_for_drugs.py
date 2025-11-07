@@ -2,7 +2,15 @@
 # this is meant to be run with
 # ./manage.py runscript bb03_parse_card_json
 # in that case django will take care of the paths and also check for migrations and such
-import json
+
+import os
+from sys import argv
+
+import django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+django.setup()
+
+from models.bad_bac_models import PDBStructure, Drug, Pdb2Drug
 from pprint import pprint
 
 import numpy as np
@@ -112,16 +120,12 @@ def get_drug_code_by_smiles (pdb_id, query_smiles) -> tuple[str, str]:
 
 
 def run():
-    from bad_bac_exercise.models import PDBStructure, Drug, Pdb2Drug
 
     for pdb_2_drug_entry in Pdb2Drug.objects.all():
         # if pdb_2_drug_entry.drug_residue_name is not None and pdb_2_drug_entry.drug_name_in_pdb is not None: continue
         pdb_id = pdb_2_drug_entry.pdb_id
         drug_id = pdb_2_drug_entry.drug_id
         pdb_entry  = PDBStructure.objects.get(pk=pdb_id)
-        if not pdb_entry.genes.all():
-            print(f"{pdb_entry.pdb_id} does not seem to map to a gene of interest here")
-            continue
         drug_entry = Drug.objects.get(pk=drug_id)
         (drug_name, pdb_code) = get_drug_code_by_smiles(pdb_entry.pdb_id, drug_entry.canonical_smiles)
         print(pdb_id, drug_entry.name, drug_name, pdb_code)
@@ -131,15 +135,26 @@ def run():
             pdb_2_drug_entry.save()
 
 
-def run_test():
+def test_run():
     pdb_id = "3TZF"
     inchi_key = "JLKIGFTWXXRPMT-UHFFFAOYSA-N"
-    (drug_name, pdb_code) = get_drug_code_by_smiles(pdb_id, inchi_key)[0]
-
+    smiles = "Cc1cc(NS(=O)(=O)c2ccc(N)cc2)no1"
+    (drug_name, pdb_code) = get_drug_code_by_smiles(pdb_id, smiles)
     print(f"The 3-character code for '{drug_name}' in PDB entry '{pdb_id}' is: {pdb_code}")
 
 
+
+#######################
+def main():
+    if len(argv) < 2:
+        exit("Tell me what to do - test or run?")
+    if argv[1] == 'run':
+        run()
+    elif argv[1] == 'test':
+        test_run()
+    else:
+        print(f"I don't know what is '{argv[1]}'. What should I do - test or run?")
+
 #######################
 if __name__ == "__main__":
-    run_test()
-
+    main()

@@ -2,8 +2,18 @@
 # this is meant to be run with
 # ./manage.py runscript bb08_...
 # in that case django will take care of the paths and also check for migrations and such
+import os
+from sys import argv
 
-from rcsbsearchapi.search import ChemSimilarityQuery
+import django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+django.setup()
+
+from models.bad_bac_models import Drug, PDBStructure, Pdb2Drug
+
+# note: this is installed with
+# pip install rcsb-api
+from rcsbapi.search import ChemSimilarityQuery
 
 
 def find_pdb_by_smiles(smiles) -> list[str]:
@@ -32,8 +42,9 @@ def find_pdb_by_smiles(smiles) -> list[str]:
 
 
 def run():
-
-    from bad_bac_exercise.models import Drug, PDBStructure
+    """
+    Updates PDBStructure, adds row to pdb_entry_3_drug through table
+    """
 
     for drug in Drug.objects.all():
         if not drug.is_discrete_structure: continue
@@ -44,20 +55,32 @@ def run():
         print(f"{drug.name}  {pdbids}")
         for pdb_id in pdbids:
             (pdb_entry, was_created) = PDBStructure.objects.update_or_create(pdb_id=pdb_id)
-            pdb_entry.drugs.add(drug)
             pdb_entry.save()
+            Pdb2Drug.objects.update_or_create(pdb_id=pdb_entry.id, drug_id=drug.id)
 
 
-def run_test():
-    # it should be possible to search the
+def test_run():
 
     # this is Simocyclinone D8
     # one of the results should be 2Y3P
-    smiles = "C[C@@H]1[C@H]([C@@H](C[C@@H](O1)C2=C(C3=C(C=C2)C(=O)[C@]45[C@]([C@@H]3O)(O4)[C@H](C[C@]6([C@@]5(C(=O)C=C(C6)C)O)O)O)O)OC(=O)/C=C/C=C/C=C/C=C/C(=O)NC7=C(C8=C(C(=C(C=C8)O)Cl)OC7=O)O)OC(=O)C"  # this is Simocyclinone D8, and should be present in 2Y3P
+    smiles = "C[C@@H]1[C@H]([C@@H](C[C@@H](O1)C2=C(C3=C(C=C2)C(=O)[C@]45[C@]([C@@H]3O)(O4)"\
+             "[C@H](C[C@]6([C@@]5(C(=O)C=C(C6)C)O)O)O)O)OC(=O)/C=C/C=C/C=C/C=C/C(=O)"\
+             "NC7=C(C8=C(C(=C(C=C8)O)Cl)OC7=O)O)OC(=O)C"
     pdbids = find_pdb_by_smiles(smiles)
     print(pdbids)
 
 
 #######################
+def main():
+    if len(argv) < 2:
+        exit("Tell me what to do - test or run?")
+    if argv[1] == 'run':
+        run()
+    elif argv[1] == 'test':
+        test_run()
+    else:
+        print(f"I don't know what is '{argv[1]}'. What should I do - test or run?")
+
+#######################
 if __name__ == "__main__":
-    run_test()
+    main()
