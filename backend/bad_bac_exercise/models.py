@@ -1,3 +1,4 @@
+from Bio import PDB
 from django.db import models
 
 """
@@ -144,6 +145,9 @@ class AntibioticResMutation(models.Model):
     card_models = models.ManyToManyField(CARDModel, db_table="abrm_2_card_model")
     drugs_affected = models.ManyToManyField(Drug, db_table="abrm_2_drug")
     drug_classes_affected = models.ManyToManyField(DrugClass, db_table="abrm_2_drug_class")
+    # note that becasue the class PDBStructure is defined below,
+    # we use a string reference
+    pdbs_available = models.ManyToManyField('PDBStructure',  through="Pdb2Mutation")
     # assembly that has the reference amino acid right
     assemblies = models.ManyToManyField(UCSCAssembly, db_table="abrm_2_assembly")
     flagged = models.BooleanField(blank=False, null=False, default=False)

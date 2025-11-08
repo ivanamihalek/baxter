@@ -10,6 +10,13 @@ from Bio.PDB import PDBParser, PDBList, Select
 
 from utils import is_nonempty_file
 
+import os
+from sys import argv
+
+import django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+django.setup()
+from models.bad_bac_models import AntibioticResMutation, Pdb2Gene, Pdb2Drug, Pdb2Mutation
 
 def download(pdbdir, pdb_id):
 
@@ -81,23 +88,35 @@ def ligand_distance(pdb_id, ligand_res_name, query_chain_id, protein_res_id) -> 
 
 
 def run():
-    from bad_bac_exercise.models import AntibioticResMutation, Pdb2Gene, Pdb2Drug, Pdb2Mutation
-
-    scratch = "/home/ivana/scratch/baxter/blast"
 
     # we will calculate the distance from the mutated residue to the nearest drug, but only for those
     # pdbs that map to one of our genes of interest
     distinct_genes = set()
     total_candidates = 0
     for abr_mutation in AntibioticResMutation.objects.all():
+        # not sure what is the purpose of the "Var" thing, but cannot deal with it now
+        if abr_mutation.mutation[-3:] == "Var": continue
         mutation_pos = int(abr_mutation.mutation[1:-1])
         mutation_from = abr_mutation.mutation[0]
+        mutation_to = abr_mutation.mutation[-1]
         gene_name = abr_mutation.gene.name
+        print(f"{gene_name}  {mutation_pos}  {mutation_from} -> {mutation_to}")
+
         drugs_affected = list(abr_mutation.drugs_affected.all())
-        if len(drugs_affected) == 0: continue
+        if len(drugs_affected) == 0:
+            print(f"\t no drugs affected")
+            continue
+        else:
+            drug_names = [d.name for d in drugs_affected]
+            print(f"\t drugs affected {drug_names}")
 
         pdb_structures = list(abr_mutation.gene.pdbstructure_set.all())
-        if len(pdb_structures) == 0: continue
+        if len(pdb_structures) == 0:
+            print(f"\t no pdb structures")
+            continue
+        else:
+            pdb_ids = [p.pdb_id for p in pdb_structures]
+            print(f"\t pdb structures {pdb_ids}")
 
         # find drug<->pdb pairs
         mapped_pdb_drug_pairs = []
@@ -117,7 +136,7 @@ def run():
 
             for mapping_entry in Pdb2Gene.objects.filter(pdb_id=p, gene=abr_mutation.gene):
 
-                # is the residue is outside of this piece of structure?
+                # is the residue outside this piece of structure?
                 if not (mapping_entry.gene_seq_start <= mutation_pos <= mapping_entry.gene_seq_end):
                     # print(f"the model residue outside of the petide range")
                     continue
@@ -133,7 +152,7 @@ def run():
                 pos_on_pdb_seq = mutation_pos - mapping_entry.pdb_seq_start
                 pdb_aa = mapping_entry.pdb_seq_aligned[pos_on_pdb_seq]
                 if mutation_from != pdb_aa:
-                    # print(f"aa mismatch between mutation position and the pdb seqeunce for the {gene_name} gene")
+                    # print(f"aa mismatch between mutation position and the pdb sequence for the {gene_name} gene")
                     continue
 
                 chain_id = f"{mapping_entry.pdb_chain}"
@@ -159,10 +178,22 @@ def run():
     print(total_candidates)
 
 
-def run_test():
+def test_run():
     distance = ligand_distance(pdb_id="1c14", ligand_res_name="TCL", query_chain_id="A", protein_res_id=93)
     print(distance)
 
 #######################
+def main():
+    if len(argv) < 2:
+        exit("Tell me what to do - test or run?")
+    if argv[1] == 'run':
+        run()
+    elif argv[1] == 'test':
+        test_run()
+    else:
+        print(f"I don't know what is '{argv[1]}'. What should I do - test or run?")
+
+#######################
 if __name__ == "__main__":
-    run_test()
+    main()
+

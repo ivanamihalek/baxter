@@ -3,6 +3,7 @@
 # ./manage.py runscript bb03_parse_card_json
 # in that case django will take care of the paths and also check for migrations and such
 import json
+import os
 from pprint import pprint
 
 import requests
@@ -11,8 +12,14 @@ import pandas as pd
 import subprocess
 from Bio.Blast import NCBIXML
 
-from .utils import is_nonempty_file
-from bad_bac_exercise.models import CARDModel, Gene, AntibioticResMutation, Drug, DrugClass, PDBStructure, Pdb2Gene
+from utils import is_nonempty_file
+
+import django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+django.setup()
+
+
+from models.bad_bac_models import CARDModel, Gene, AntibioticResMutation, Drug, DrugClass, PDBStructure, Pdb2Gene
 
 
 def run_blast(query_file, output_file):
@@ -72,6 +79,8 @@ def parse_blast_results(gene_entry, blast_results_file):
 def run():
 
     scratch = "/home/ivana/scratch/baxter/blast"
+    if not os.path.exists(scratch):
+        os.makedirs(scratch, exist_ok=True)
 
     for gene_entry in Gene.objects.all():
         blast_results_file = f"{scratch}/{gene_entry.name}_blastout.xml"
