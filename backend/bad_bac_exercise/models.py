@@ -147,7 +147,8 @@ class AntibioticResMutation(models.Model):
     drug_classes_affected = models.ManyToManyField(DrugClass, db_table="abrm_2_drug_class")
     # note that becasue the class PDBStructure is defined below,
     # we use a string reference
-    pdbs_available = models.ManyToManyField('PDBStructure',  through="Pdb2Mutation")
+    pdbs_available  = models.ManyToManyField('PDBStructure',  through="Pdb2Mutation")
+    env_publication = models.ManyToManyField('EnvironmentPublication',  through="EnvPublication2Mutation")
     # assembly that has the reference amino acid right
     assemblies = models.ManyToManyField(UCSCAssembly, db_table="abrm_2_assembly")
     flagged = models.BooleanField(blank=False, null=False, default=False)
@@ -167,6 +168,23 @@ class PDBStructure(models.Model):
 
     class Meta:
         db_table = 'pdb_structures'
+
+# To set a
+# JSONField's default value to an empty list in Django,
+# you should use the callable default=list instead of default=[].
+# Using a mutable object (like [] or {}) directly as a default value will
+# cause all instances of that model to share the same default object,
+# leading to unexpected behavior and data corruption when modified.
+class EnvironmentPublication(models.Model):
+    pmid  = models.IntegerField(null=False, unique=True, default=None)
+    pmcid = models.CharField(max_length=20, null=False, unique=True, default=None)
+    title = models.TextField(default=None)
+    pub_year = models.IntegerField(default=None)
+    env_keywords_found = models.JSONField(default=list)
+    deposition_markers_found = models.JSONField(default=list)
+    mutation = models.ManyToManyField(AntibioticResMutation,  through="EnvPublication2Mutation")
+    class Meta:
+        db_table = 'env_publications'
 
 
 class Gene2UCSCAssembly(models.Model):
@@ -246,3 +264,10 @@ class Pdb2Mutation(models.Model):
 
     class Meta:
         db_table = 'pdb_2_mutation'
+
+class EnvPublication2Mutation(models.Model):
+    env_publication = models.ForeignKey(EnvironmentPublication, on_delete=models.CASCADE)
+    antibio_res_mutation = models.ForeignKey(AntibioticResMutation, on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'env_publication_2_mutation'

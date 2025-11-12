@@ -374,7 +374,7 @@ def find_candidates(terms, page_size: int = 25, sleep_between_api=1.3 ) -> List[
 def run():
     page_size = 25
     ct = 0
-    # TODO create paper entry in the database
+
     for abr_mutation in AntibioticResMutation.objects.all():
         mutation_terms = [abr_mutation.gene.name, abr_mutation.mutation]
         print(mutation_terms)
