@@ -145,7 +145,7 @@ class AntibioticResMutation(models.Model):
     card_models = models.ManyToManyField(CARDModel, db_table="abrm_2_card_model")
     drugs_affected = models.ManyToManyField(Drug, db_table="abrm_2_drug")
     drug_classes_affected = models.ManyToManyField(DrugClass, db_table="abrm_2_drug_class")
-    # note that becasue the class PDBStructure is defined below,
+    # note that because the class PDBStructure is defined below,
     # we use a string reference
     pdbs_available  = models.ManyToManyField('PDBStructure',  through="Pdb2Mutation")
     env_publication = models.ManyToManyField('EnvironmentPublication',  through="EnvPublication2Mutation")
@@ -178,10 +178,10 @@ class PDBStructure(models.Model):
 class EnvironmentPublication(models.Model):
     pmid  = models.IntegerField(null=False, unique=True, default=None)
     pmcid = models.CharField(max_length=20, null=False, unique=True, default=None)
-    title = models.TextField(default=None)
-    pub_year = models.IntegerField(default=None)
-    env_keywords_found = models.JSONField(default=list)
-    deposition_markers_found = models.JSONField(default=list)
+    title = models.TextField(default=None, null=True) # null=False is the default in Django ORM
+    pub_year = models.IntegerField(default=None, null=True)
+    env_keywords_found = models.JSONField(default=list, null=True)
+    deposition_markers_found = models.JSONField(default=list, null=True)
     mutation = models.ManyToManyField(AntibioticResMutation,  through="EnvPublication2Mutation")
     class Meta:
         db_table = 'env_publications'

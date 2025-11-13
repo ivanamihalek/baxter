@@ -1,5 +1,8 @@
 #! /usr/bin/env python
 from __future__ import annotations
+
+import html
+
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -9,25 +12,19 @@ import os
 import re
 import sys
 from time import sleep
+import django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+django.setup()
 
 import requests
 from sys import argv
 from dataclasses import dataclass
 from typing import List, Optional, Iterable, Mapping, Dict, Tuple
-from bs4 import BeautifulSoup
-from lxml import etree
-from requests import Session
+
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-from zeep import Client
-from zeep.exceptions import Fault, TransportError
-from zeep.transports import Transport
+from models.bad_bac_models import EnvironmentPublication, AntibioticResMutation
 
-import django
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
-django.setup()
-from models.bad_bac_models import AntibioticResMutation
 
 
 # ---------- Config ----------
@@ -45,7 +42,7 @@ ENV_KEYWORDS = [
 ]
 DEPOSITION_MARKERS = [
     "sequence read archive", "sra", "ena", "ebi", "bioproject", "prjna", "prjeb",
-    "accession", "biosample", "run accession", "raw reads", "short read archive"
+     "biosample", "run accession", "raw reads", "short read archive"
 ]
 # simple regex to capture PRJ* style accessions e.g. PRJNA12345 PRJEB12345
 PRJ_REGEX = re.compile(r"\b(PRJNA|PRJEB|PRJDB|PRJDA|PRJCA)\w*\d+\b", re.IGNORECASE)
@@ -174,8 +171,6 @@ def extract_papermatch_from_record(rec: dict) -> PaperMatch:
     for marker in DEPOSITION_MARKERS:
         if marker.lower() in (abstract or "").lower() or marker.lower() in title.lower():
             dep_found.append(marker)
-    # PRJ accessions
-    prjs = PRJ_REGEX.findall((abstract or ""))
     # PRJ_REGEX.findall returns tuples for groups; flatten
     prj_accessions = []
     for m in PRJ_REGEX.finditer((abstract or "")):
@@ -251,12 +246,15 @@ def _normalize_pmcid(pmcid: str) -> str:
     """
     Normalize a PMCID string. Accepts values like 'PMC12345' or '12345' and returns 'PMC12345'.
     """
-    pmcid = pmcid.strip().upper()
-    if pmcid.startswith("PMC"):
-        return pmcid
-    if pmcid.isdigit():
-        return f"PMC{pmcid}"
-    raise ValueError(f"Invalid PMCID format: {pmcid!r}")
+    try:
+        pmcid = pmcid.strip().upper()
+
+        if pmcid.startswith("PMC"):
+            return pmcid
+        if pmcid.isdigit():
+            return f"PMC{pmcid}"
+    except:
+        raise ValueError(f"Invalid PMCID format: {pmcid!r}")
 
 
 def strip_tags(xml_string: str) -> str:
@@ -268,7 +266,10 @@ def fetch_full_text_xml(pmcid: str, session: requests.Session | None = None) -> 
     Fetch the full text (JATS XML) from Europe PMC and return extracted plain text.
     Prefers abstract + body content. Falls back to entire XML text if structure is missing.
     """
-    pmcid = _normalize_pmcid(pmcid)
+    try:
+        pmcid = _normalize_pmcid(pmcid)
+    except ValueError:
+        raise EuropePMCFetchError(f"Error parsing pncid: {pmcid}")
     close_session = False
     if session is None:
         session = _build_session()
@@ -342,9 +343,18 @@ def check_terms_in_pmcid(pmcid: str, terms: Iterable[str]) -> Dict[str, Dict[str
     """
     High-level function: fetch text for a PMCID and check for terms.
     """
-    text = fetch_full_text_xml(pmcid)
-    # we dont want a match in references
-    return find_terms_in_text(text.replace("REFERENCES", "References").split('References')[0], terms)
+    try:
+        text = fetch_full_text_xml(pmcid)
+    except EuropePMCFetchError as e:
+        raise e
+
+    try:
+        # we dont want a match in references
+        results = find_terms_in_text(text.replace("REFERENCES", "References").split('References')[0], terms)
+    except EuropePMCFetchError as e:
+        raise e
+
+    return results
 
 
 def find_candidates(terms, page_size: int = 25, sleep_between_api=1.3 ) -> List[PaperMatch]:
@@ -373,29 +383,35 @@ def find_candidates(terms, page_size: int = 25, sleep_between_api=1.3 ) -> List[
 
 def run():
     page_size = 25
-    ct = 0
 
     for abr_mutation in AntibioticResMutation.objects.all():
+        # if abr_mutation.id < 197: continue
         mutation_terms = [abr_mutation.gene.name, abr_mutation.mutation]
         print(mutation_terms)
         candidate_papers = find_candidates(mutation_terms, page_size)
         print(f"Number of candidate papers:", len(candidate_papers))
 
-        for cp in candidate_papers[:5]:
+        for cp in candidate_papers:
+
 
             sleep(2.7)
-            # TODO if the pmid already in the database - continue
+
             try:
                 results = check_terms_in_pmcid(cp.pmcid, mutation_terms + ENV_KEYWORDS + DEPOSITION_MARKERS)
             except (EuropePMCFetchError, ValueError) as e:
                 print(f"Error: {e}")
                 continue
 
+            terms_found = set()
             for term, info in results.items():
                 if info['count'] == 0: continue
                 print(f"- {term}: found={info['found']} count={info['count']}")
+                terms_found.add(term)
 
-            terms_found = set(results.keys())
+            print()
+            print(cp.pmid)
+            print(cp.title)
+            print("terms found:", terms_found)
             mutations_found = terms_found.intersection(mutation_terms)
             if len(mutations_found) != len(mutation_terms): continue
 
@@ -404,16 +420,21 @@ def run():
 
             deposition_terms_found = terms_found.intersection(DEPOSITION_MARKERS)
             if len(deposition_terms_found) == 0: continue
-            print()
-            print(cp.pmid)
-            print(cp.title)
 
+            print(cp.prj_accessions)
             print(mutations_found)
             print(env_terms_found)
             print(deposition_terms_found)
-            # TODO store the paper entry and the through table
-        print()
-        if (ct := ct +1)==5:  exit()
+
+
+            (env_publication, was_created) = EnvironmentPublication.objects.get_or_create(pmid=cp.pmid, pmcid = cp.pmcid)
+            env_publication.title = re.sub(r'<[^>]+>', '', html.unescape(cp.title))
+            env_publication.pub_year = cp.pub_year
+            env_publication.env_keywords_found = list(env_terms_found)
+            env_publication.deposition_markers_found = list(deposition_terms_found)
+            env_publication.save()
+            abr_mutation.env_publication.add(env_publication)
+
 
 
 def test_run_0(pmcid = "PMC12284700"):
